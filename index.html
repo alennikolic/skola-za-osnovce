@@ -206,7 +206,7 @@ kbd{
       <div class="grupa">
         <label for="brzina">Брзина</label>
         <input type="range" id="brzina" min="100" max="1200" step="25" value="60">
-        <span class="brzina-broj" id="brzinaBroj">350</span>
+        <span class="brzina-broj" id="brzinaBroj">60</span>
       </div>
       <div class="grupa">
         <label for="grupisanje">Речи одједном</label>
@@ -307,7 +307,7 @@ var tajmer = null;
 var tekuciId = null;
 var oznaceno = [-1,-1];
 
-var brzina = ostava.uzmi("brzocitac.brzina", 350);
+var brzina = ostava.uzmi("brzocitac.brzina", 60);
 var grupa  = ostava.uzmi("brzocitac.grupa", 1);
 var rezim  = ostava.uzmi("brzocitac.rezim", "rezim-oba");
 var pauze  = ostava.uzmi("brzocitac.pauze", true);
