@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сат и време</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@600;700;800&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2A4A;
+    --paper:#FFF4F0;
+    --dot:#F0D2C8;
+    --sun:#FFC93C;
+    --coral:#FF6B5B;
+    --mint:#2ED9A0;
+    --grape:#8C6BEA;
+    --sky:#4CC3F0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Nunito','Segoe UI',Arial,sans-serif;color:var(--ink);
+    background-color:var(--paper);
+    background-image:radial-gradient(var(--dot) 1.6px, transparent 1.7px);
+    background-size:24px 24px;min-height:100vh;padding:18px 14px 60px;
+    -webkit-user-select:none;user-select:none;
+  }
+  body, body *{font-style:normal !important}
+  h1,h2,h3{font-family:'Rubik','Nunito',Arial,sans-serif}
+  .wrap{max-width:820px;margin:0 auto}
+
+  .topbar{
+    display:flex;align-items:center;gap:14px;background:#fff;border:3px solid var(--ink);
+    border-radius:22px;box-shadow:0 6px 0 var(--ink);padding:14px 18px;margin-bottom:18px;
+  }
+  .mascot{font-size:2.6rem;line-height:1;flex:none}
+  .topbar h1{font-size:1.35rem;margin:0}
+  .topbar p{margin:2px 0 0;font-size:.9rem;font-weight:700;opacity:.65}
+
+  .panel{
+    background:#fff;border:3px solid var(--ink);border-radius:22px;
+    box-shadow:0 6px 0 var(--ink);padding:18px;margin-bottom:18px;
+  }
+  .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+  .row:last-child{margin-bottom:0}
+  .row-label{font-weight:900;font-size:.95rem;min-width:110px}
+  .chip{
+    font-family:inherit;font-weight:900;font-size:.95rem;background:#fff;color:var(--ink);
+    border:3px solid var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer;
+    box-shadow:0 3px 0 var(--ink);transition:transform .08s,background .2s;
+  }
+  .chip:hover{background:#FFF0EA}
+  .chip:active{transform:translateY(3px);box-shadow:0 0 0 var(--ink)}
+  .chip[aria-pressed="true"]{background:var(--sun)}
+
+  .modes{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .mode{
+    text-align:left;font-family:inherit;cursor:pointer;color:var(--ink);border:3px solid var(--ink);
+    border-radius:22px;box-shadow:0 6px 0 var(--ink);padding:18px;transition:transform .08s;
+  }
+  .mode:active{transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+  .mode .ic{font-size:2.2rem;display:block;margin-bottom:6px}
+  .mode b{font-family:'Rubik',Arial,sans-serif;font-size:1.1rem;display:block}
+  .mode .sub{font-size:.85rem;font-weight:700;opacity:.75}
+  .m1{background:var(--sun)} .m2{background:var(--sky)}
+  .m3{background:var(--grape);color:#fff} .m4{background:var(--mint)}
+  .m5{background:#fff;grid-column:1 / -1}
+
+  .gamebar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .dots{display:flex;gap:6px;flex:1;flex-wrap:wrap}
+  .dot{width:14px;height:14px;border-radius:50%;border:2.5px solid var(--ink);background:#fff}
+  .dot.done{background:var(--mint)} .dot.miss{background:var(--coral)}
+  .dot.now{background:var(--sun);transform:scale(1.25)}
+
+  .stage{text-align:center;padding:20px 16px}
+  .ask{font-size:1rem;font-weight:800;opacity:.7;margin-bottom:12px}
+
+  /* ---------- сат ---------- */
+  .clock{width:260px;height:260px;max-width:78vw;max-height:78vw;touch-action:none}
+  .clock.small{width:120px;height:120px;max-width:100%;max-height:none}
+  .cface{fill:#fff;stroke:var(--ink);stroke-width:5}
+  .ctick{stroke:var(--ink);stroke-width:2;stroke-linecap:round}
+  .ctick.big{stroke-width:4}
+  .cnum{font-family:'Rubik',Arial,sans-serif;font-weight:700;font-size:15px;fill:var(--ink);
+        text-anchor:middle;dominant-baseline:central}
+  .cmin{font-family:'Nunito',Arial,sans-serif;font-weight:800;font-size:8px;fill:var(--grape);
+        text-anchor:middle;dominant-baseline:central}
+  .hand-h{stroke:var(--ink);stroke-width:8;stroke-linecap:round}
+  .hand-m{stroke:var(--coral);stroke-width:5.5;stroke-linecap:round}
+  .cdot{fill:var(--ink)}
+  .grab .hand-h,.grab .hand-m{cursor:grab}
+  .clock-legend{font-size:.8rem;font-weight:800;opacity:.7;margin-top:6px}
+  .clock-legend .sq{display:inline-block;width:14px;height:5px;border-radius:3px;vertical-align:middle}
+
+  .digital{
+    font-family:'Rubik',Arial,sans-serif;font-size:2.8rem;font-weight:700;letter-spacing:2px;
+    background:var(--ink);color:#fff;border-radius:16px;padding:10px 22px;display:inline-block;margin:4px 0 10px;
+  }
+  .wordtime{font-size:1.35rem;font-weight:900;margin-bottom:12px;color:var(--grape)}
+  .story{
+    font-size:1.2rem;font-weight:800;line-height:1.55;margin:6px auto 16px;max-width:460px;
+    background:var(--paper);border:3px solid var(--ink);border-radius:18px;padding:16px;text-align:left;
+  }
+
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+  .opt{
+    font-family:'Rubik',Arial,sans-serif;font-weight:700;font-size:1.55rem;background:#fff;color:var(--ink);
+    border:3px solid var(--ink);border-radius:18px;box-shadow:0 5px 0 var(--ink);padding:16px 8px;
+    cursor:pointer;transition:transform .08s,background .2s;
+  }
+  .opt.clockopt{padding:10px 4px;display:flex;justify-content:center}
+  .opt:hover{background:#FFF0EA}
+  .opt:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+  .opt.good{background:var(--mint);color:#fff}
+  .opt.bad{background:var(--coral);color:#fff;animation:shake .35s}
+  .opt.off{opacity:.35;cursor:default}
+  @keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+  .setrow{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .stepbtn{
+    font-family:'Rubik',Arial,sans-serif;font-weight:700;font-size:1rem;background:#fff;color:var(--ink);
+    border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);padding:10px 14px;cursor:pointer;
+  }
+  .stepbtn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+  .stepbtn.check{background:var(--mint);color:#fff;padding:10px 26px}
+
+  .helper{margin-top:16px}
+  .hint-btn{
+    font-family:inherit;font-weight:900;background:var(--paper);border:3px solid var(--ink);
+    border-radius:999px;padding:8px 18px;cursor:pointer;box-shadow:0 3px 0 var(--ink);color:var(--ink);
+  }
+  .hint-text{
+    margin-top:12px;background:var(--paper);border:3px dashed var(--ink);border-radius:16px;
+    padding:12px;font-weight:800;font-size:1.05rem;line-height:1.6;text-align:left;
+  }
+  .hint-text b{font-family:'Rubik',Arial,sans-serif}
+
+  .buddy{display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;margin-top:16px}
+  .buddy .face{font-size:2.4rem}
+  .bubble{background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:8px 14px;font-weight:900;font-size:1.05rem}
+
+  .result{text-align:center;padding:26px 18px}
+  .score-big{font-family:'Rubik',Arial,sans-serif;font-size:3.4rem;font-weight:700;margin:8px 0}
+  .stars{font-size:1.8rem;letter-spacing:4px;margin-bottom:10px}
+  .review{text-align:left;margin:18px auto 0;max-width:440px}
+  .review h3{font-size:1rem;margin:0 0 8px}
+  .review ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+  .review li{background:var(--paper);border:2.5px solid var(--ink);border-radius:14px;padding:10px 12px;font-weight:800}
+
+  .learn h3{font-size:1.1rem;margin:0 0 8px;padding-bottom:6px;border-bottom:3px solid var(--dot)}
+  .learn-block{margin-bottom:24px}
+  .learn-block p{font-weight:800;line-height:1.6;margin:6px 0}
+  .learn-flex{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  .ex-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-top:10px}
+  .ex{background:var(--paper);border:2.5px solid var(--ink);border-radius:14px;padding:10px;text-align:center}
+  .ex b{display:block;font-family:'Rubik',Arial,sans-serif;font-size:1.1rem;margin-top:4px}
+  .ex small{font-weight:800;opacity:.75}
+
+  [hidden]{display:none !important}
+  button:focus-visible{outline:4px dashed var(--grape);outline-offset:3px}
+  .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+  .conf{position:absolute;font-size:1.5rem;animation:fall 1.2s ease-in forwards}
+  @keyframes fall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(60vh) rotate(320deg);opacity:0}}
+
+  @media (max-width:480px){
+    .modes{grid-template-columns:1fr}
+    .row-label{min-width:100%}
+    .opt{font-size:1.25rem}
+    .digital{font-size:2.2rem}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="mascot">🐿️</span>
+    <div>
+      <h1>Сат и време</h1>
+      <p>Читање сата, намештање казаљки и рачунање времена</p>
+    </div>
+  </div>
+
+  <!-- ================= ПОЧЕТНА ================= -->
+  <section id="screen-home">
+    <div class="panel">
+      <div class="row">
+        <span class="row-label">Тачност:</span>
+        <button class="chip" data-step="30" aria-pressed="false">Пун сат и пола</button>
+        <button class="chip" data-step="15" aria-pressed="true">На четврт сата</button>
+        <button class="chip" data-step="5" aria-pressed="false">На 5 минута</button>
+        <button class="chip" data-step="1" aria-pressed="false">На минут</button>
+      </div>
+      <div class="row">
+        <span class="row-label">Помоћ:</span>
+        <button class="chip" id="btnMinNums" aria-pressed="true">Бројеви минута на сату</button>
+      </div>
+    </div>
+
+    <div class="modes">
+      <button class="mode m1" data-mode="read">
+        <span class="ic">🕐</span>
+        <b>Прочитај сат</b>
+        <span class="sub">Гледаш казаљке, бираш тачно време</span>
+      </button>
+      <button class="mode m2" data-mode="set">
+        <span class="ic">✋</span>
+        <b>Намести казаљке</b>
+        <span class="sub">Превуци казаљке на тражено време</span>
+      </button>
+      <button class="mode m3" data-mode="calc">
+        <span class="ic">⏱️</span>
+        <b>Рачунање времена</b>
+        <span class="sub">Када почиње, када се завршава, колико траје</span>
+      </button>
+      <button class="mode m4" data-mode="day">
+        <span class="ic">🌗</span>
+        <b>24 часа и део дана</b>
+        <span class="sub">15:40 је исто што и 3:40 поподне</span>
+      </button>
+      <button class="mode m5" data-mode="learn">
+        <span class="ic">📖</span>
+        <b>Како се чита сат</b>
+        <span class="sub">Објашњење казаљки и израза, са примерима</span>
+      </button>
+    </div>
+    <p style="text-align:center;font-size:.85rem;font-weight:700;opacity:.6;margin-top:8px">
+      Свака игра има 10 задатака. Звездица се добија за тачан одговор из првог покушаја.
+    </p>
+  </section>
+
+  <!-- ================= ИГРА ================= -->
+  <section id="screen-game" hidden>
+    <div class="gamebar">
+      <button class="chip" id="btnBack">◂ Назад</button>
+      <div class="dots" id="dots"></div>
+      <span class="chip" style="cursor:default;box-shadow:none">⭐ <b id="starCount">0</b></span>
+    </div>
+
+    <div class="panel stage">
+      <div class="ask" id="ask"></div>
+      <div id="promptArea"></div>
+      <div class="options" id="options" hidden></div>
+      <div id="setArea" hidden></div>
+
+      <div class="helper">
+        <button class="hint-btn" id="btnHint">💡 Помоћ</button>
+        <div class="hint-text" id="hintText" hidden></div>
+      </div>
+
+      <div class="buddy">
+        <span class="face" id="face">🐿️</span>
+        <span class="bubble" id="bubble">Погледај добро казаљке!</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= РЕЗУЛТАТ ================= -->
+  <section id="screen-result" hidden>
+    <div class="panel result">
+      <div id="resEmoji" style="font-size:4rem">🏆</div>
+      <div class="score-big"><span id="resScore">0</span> / 10</div>
+      <div class="stars" id="resStars"></div>
+      <p style="font-weight:900;font-size:1.2rem" id="resMsg"></p>
+      <div class="review" id="review" hidden>
+        <h3>Задаци за поновно вежбање:</h3>
+        <ul id="reviewList"></ul>
+      </div>
+      <div class="row" style="justify-content:center;margin-top:20px">
+        <button class="chip" id="btnAgain" style="background:var(--mint)">🔁 Играј поново</button>
+        <button class="chip" id="btnHome">🏠 Почетна</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= УЧЕЊЕ ================= -->
+  <section id="screen-learn" hidden>
+    <div class="gamebar"><button class="chip" id="btnBack2">◂ Назад</button></div>
+    <div class="panel learn" id="learnBody"></div>
+  </section>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+const shuffle = a => a.slice().sort(()=>Math.random()-0.5);
+const ROUND = 10;
+
+const state = { step:15, minNums:true, mode:null, queue:[], idx:0, stars:0, tries:0,
+                missed:[], doneMap:{}, usedHint:false, set:{h:12,m:0} };
+
+/* ================= ИЗРАЗИ ЗА ВРЕМЕ ================= */
+const ONES = {1:"један",2:"два",3:"три",4:"четири",5:"пет",6:"шест",7:"седам",8:"осам",9:"девет",
+  10:"десет",11:"једанаест",12:"дванаест",13:"тринаест",14:"четрнаест",15:"петнаест",16:"шеснаест",
+  17:"седамнаест",18:"осамнаест",19:"деветнаест",20:"двадесет",30:"тридесет",40:"четрдесет",50:"педесет"};
+function numWord(n){
+  if(ONES[n]) return ONES[n];
+  return ONES[Math.floor(n/10)*10] + " " + ONES[n%10];
+}
+const h12 = h => ((h - 1 + 12) % 12) + 1;
+const hourWord = h => ONES[h12(h)];
+const nextH = h => h12(h) % 12 + 1;
+function hourNoun(h){ h = h12(h); return h === 1 ? "сат" : (h >= 2 && h <= 4 ? "сата" : "сати"); }
+
+function words(h, m){
+  h = h12(h);
+  if(m === 0)  return hourWord(h) + " " + hourNoun(h);
+  if(m === 30) return "пола " + hourWord(nextH(h));
+  if(m === 45) return "петнаест до " + hourWord(nextH(h));
+  if(m < 30)   return hourWord(h) + " и " + numWord(m);
+  return numWord(60 - m) + " до " + hourWord(nextH(h));
+}
+function digital(h, m){ return h12(h) + ":" + String(m).padStart(2,"0"); }
+function digital24(h24, m){ return h24 + ":" + String(m).padStart(2,"0"); }
+function duration(mins){
+  const h = Math.floor(mins/60), m = mins % 60, p = [];
+  if(h) p.push(h + " " + (h === 1 ? "сат" : (h >= 2 && h <= 4 ? "сата" : "сати")));
+  if(m) p.push(m + " " + (m % 10 === 1 && m % 100 !== 11 ? "минут" : "минута"));
+  return p.join(" и ") || "0 минута";
+}
+function partOfDay(h24){
+  if(h24 >= 5 && h24 < 12) return "ујутру";
+  if(h24 >= 12 && h24 < 18) return "поподне";
+  if(h24 >= 18 && h24 < 22) return "увече";
+  return "ноћу";
+}
+
+/* ================= ЦРТАЊЕ САТА ================= */
+let clockSeq = 0;
+function clockMarkup(h, m, opt){
+  opt = opt || {};
+  const id = "clk" + (++clockSeq);
+  const small = !!opt.small;
+  const showMin = state.minNums && !small;
+  const R = showMin ? 82 : 90;            // полупречник бројчаника
+  let ticks = "", nums = "", mins = "";
+  for(let i=0;i<60;i++){
+    const a = i*6*Math.PI/180, big = i%5===0;
+    const r1 = R - (big ? 13 : 7), r2 = R - 3;
+    ticks += '<line class="ctick' + (big?" big":"") + '" x1="' + (100+r1*Math.sin(a)).toFixed(1) +
+             '" y1="' + (100-r1*Math.cos(a)).toFixed(1) + '" x2="' + (100+r2*Math.sin(a)).toFixed(1) +
+             '" y2="' + (100-r2*Math.cos(a)).toFixed(1) + '"/>';
+  }
+  for(let i=1;i<=12;i++){
+    const a = i*30*Math.PI/180;
+    const rn = R - 26;
+    nums += '<text class="cnum" x="' + (100+rn*Math.sin(a)).toFixed(1) + '" y="' + (100-rn*Math.cos(a)).toFixed(1) + '">' + i + '</text>';
+    if(showMin){
+      const rm = R + 9;
+      mins += '<text class="cmin" x="' + (100+rm*Math.sin(a)).toFixed(1) + '" y="' + (100-rm*Math.cos(a)).toFixed(1) + '">' + (i*5 === 60 ? 0 : i*5) + '</text>';
+    }
+  }
+  const ha = (h12(h)%12)*30 + m*0.5, ma = m*6;
+  const hLen = R - 38, mLen = R - 14;
+  return {
+    id,
+    html:
+    '<svg id="' + id + '" class="clock' + (small?" small":"") + (opt.grab?" grab":"") + '" viewBox="0 0 200 200" role="img" aria-label="аналогни сат">' +
+      '<circle class="cface" cx="100" cy="100" r="' + R + '"/>' +
+      ticks + nums + mins +
+      '<line class="hand-h" data-hand="h" x1="100" y1="100" x2="100" y2="' + (100-hLen) + '" transform="rotate(' + ha + ' 100 100)"/>' +
+      '<line class="hand-m" data-hand="m" x1="100" y1="100" x2="100" y2="' + (100-mLen) + '" transform="rotate(' + ma + ' 100 100)"/>' +
+      '<circle class="cdot" cx="100" cy="100" r="6"/>' +
+    '</svg>'
+  };
+}
+function setHands(id, h, m){
+  const svg = $(id); if(!svg) return;
+  svg.querySelector('[data-hand="h"]').setAttribute("transform", "rotate(" + ((h12(h)%12)*30 + m*0.5) + " 100 100)");
+  svg.querySelector('[data-hand="m"]').setAttribute("transform", "rotate(" + (m*6) + " 100 100)");
+}
+
+/* --- превлачење казаљки --- */
+function makeDraggable(id){
+  const svg = $(id);
+  let hand = null;
+  const angleAt = e => {
+    const r = svg.getBoundingClientRect();
+    const cx = r.left + r.width/2, cy = r.top + r.height/2;
+    const dx = e.clientX - cx, dy = e.clientY - cy;
+    return { ang: (Math.atan2(dx, -dy)*180/Math.PI + 360) % 360, dist: Math.hypot(dx,dy)/(r.width/2) };
+  };
+  const apply = e => {
+    const {ang} = angleAt(e);
+    if(hand === "m"){
+      let m = Math.round(ang/6) % 60;
+      m = Math.round(m/state.step)*state.step % 60;
+      state.set.m = m;
+    } else {
+      let h = Math.round(ang/30) % 12;
+      state.set.h = h === 0 ? 12 : h;
+    }
+    setHands(id, state.set.h, state.set.m);
+    $("setDigital").textContent = digital(state.set.h, state.set.m);
+  };
+  svg.addEventListener("pointerdown", e=>{
+    const {dist} = angleAt(e);
+    if(dist < 0.18) return;
+    hand = dist > 0.55 ? "m" : "h";
+    svg.setPointerCapture(e.pointerId);
+    apply(e);
+  });
+  svg.addEventListener("pointermove", e=>{ if(hand) apply(e); });
+  ["pointerup","pointercancel"].forEach(ev => svg.addEventListener(ev, ()=>{ hand = null; }));
+}
+
+/* ================= ГЕНЕРАТОРИ ЗАДАТАКА ================= */
+function randTime(){
+  const m = rnd(0, Math.floor(59/state.step)) * state.step;
+  return { h: rnd(1,12), m: m % 60 };
+}
+function sameTime(a,b){ return h12(a.h) === h12(b.h) && a.m === b.m; }
+
+function makeRead(){
+  const t = randTime();
+  const cands = [
+    {h:t.h, m:(t.m + 30) % 60},
+    {h:t.h % 12 + 1, m:t.m},
+    {h:h12(t.h - 1), m:t.m},
+    {h:t.h, m:(t.m + state.step) % 60},
+    {h:t.h, m:(t.m - state.step + 60) % 60},
+    {h:h12(Math.max(1, Math.round(t.m/5) || 12)), m:(h12(t.h)*5) % 60}   // замена казаљки
+  ];
+  const wrong = [];
+  shuffle(cands).forEach(c=>{
+    if(wrong.length < 3 && !sameTime(c,t) && !wrong.some(w=>sameTime(w,c))) wrong.push(c);
+  });
+  while(wrong.length < 3){
+    const c = randTime();
+    if(!sameTime(c,t) && !wrong.some(w=>sameTime(w,c))) wrong.push(c);
+  }
+  return { type:"read", t, wrong };
+}
+
+function makeSet(){
+  const t = randTime();
+  return { type:"set", t };
+}
+
+const NAMES = [{n:"Мила",g:"f"},{n:"Вук",g:"m"},{n:"Лена",g:"f"},{n:"Марко",g:"m"},
+               {n:"Тара",g:"f"},{n:"Урош",g:"m"},{n:"Ана",g:"f"},{n:"Лука",g:"m"}];
+function makeCalc(){
+  const kind = rnd(1,4);
+  const p = NAMES[rnd(0,NAMES.length-1)];
+  const startH = rnd(7,20), startM = rnd(0, Math.floor(59/state.step)) * state.step % 60;
+  const start = startH*60 + startM;
+  const lenChoices = state.step >= 15 ? [15,30,45,60,90,120] : [10,20,25,35,45,50,70,85];
+  const len = lenChoices[rnd(0,lenChoices.length-1)];
+
+  if(kind === 1){
+    const end = start + len;
+    return { type:"calc", answer:fmtClock(end), q:
+      "Час почиње у <b>" + fmtClock(start) + "</b> и траје <b>" + duration(len) + "</b>. Када се завршава?",
+      hint:"Од " + fmtClock(start) + " додај " + duration(len) + ".", ansKind:"time", start, len, end };
+  }
+  if(kind === 2){
+    const end = start + len;
+    return { type:"calc", answer:duration(len), q:
+      "Воз креће у <b>" + fmtClock(start) + "</b>, а стиже у <b>" + fmtClock(end) + "</b>. Колико траје вожња?",
+      hint:"Броји од " + fmtClock(start) + " до пуног сата, па даље до " + fmtClock(end) + ".",
+      ansKind:"dur", start, len, end };
+  }
+  if(kind === 3){
+    const end = start + len;
+    return { type:"calc", answer:fmtClock(start), q:
+      p.n + " треба да буде у школи у <b>" + fmtClock(end) + "</b>. Полази од куће <b>" + duration(len) +
+      "</b> раније. Када полази?",
+      hint:"Од " + fmtClock(end) + " одузми " + duration(len) + ".", ansKind:"time", start, len, end };
+  }
+  const end = start + len;
+  return { type:"calc", answer:fmtClock(end), q:
+    "Филм почиње у <b>" + fmtClock(start) + "</b> и траје <b>" + duration(len) + "</b>. У колико сати се завршава?",
+    hint:"Прво додај пуне сате, па минуте.", ansKind:"time", start, len, end };
+}
+function fmtClock(mins){
+  const t = ((mins % 1440) + 1440) % 1440;
+  return Math.floor(t/60) + ":" + String(t%60).padStart(2,"0");
+}
+function calcOptions(task){
+  const set = new Set([task.answer]), out = [];
+  const cands = task.ansKind === "time"
+    ? [task.end + 60, task.end - 60, task.start + 60, task.end + 10, task.end - 10, task.end + 30, task.end - 30]
+        .map(fmtClock)
+    : [task.len + 60, Math.abs(task.len - 60), task.len + 15, Math.abs(task.len - 15), task.len + 30, task.len + 5]
+        .filter(v => v > 0).map(duration);
+  shuffle(cands).forEach(v=>{ if(out.length < 3 && !set.has(v)){ set.add(v); out.push(v); } });
+  while(out.length < 3){
+    const v = task.ansKind === "time" ? fmtClock(rnd(0,1439)) : duration(rnd(1,10)*10);
+    if(!set.has(v)){ set.add(v); out.push(v); }
+  }
+  return out;
+}
+
+function makeDay(){
+  const h24 = rnd(13,23), m = rnd(0, Math.floor(59/state.step)) * state.step % 60;
+  const reverse = Math.random() < 0.4;
+  if(reverse){
+    const answer = digital24(h24, m);
+    const wrong = [digital24(h24-12, m), digital24(h24+1 > 23 ? 12 : h24+1, m), digital24(h24-1, m)];
+    return { type:"day", q:"Колико је сати на дигиталном сату (24 часа) ако је <b>" + digital(h24, m) + " " + partOfDay(h24) + "</b>?",
+             answer, wrong, hint:"После поднева на сат додајеш 12: " + h12(h24) + " + 12 = " + h24 + "." };
+  }
+  const answer = digital(h24, m) + " " + partOfDay(h24);
+  const wrong = [
+    digital(h24, m) + " ујутру",
+    digital(h24 - 1, m) + " " + partOfDay(h24),
+    digital(h24 + 1 > 23 ? 12 : h24 + 1, m) + " " + partOfDay(h24)
+  ].filter((v,i,a) => v !== answer && a.indexOf(v) === i);
+  while(wrong.length < 3) wrong.push(digital(rnd(1,12), m) + " увече");
+  return { type:"day", q:"Дигитални сат показује <b>" + digital24(h24, m) + "</b>. Колико је то сати на обичном сату?",
+           answer, wrong:wrong.slice(0,3), hint:"Одузми 12 од броја сати: " + h24 + " − 12 = " + h12(h24) + "." };
+}
+
+/* ================= ЕКРАНИ ================= */
+function setScreen(name){
+  ["home","game","result","learn"].forEach(s => $("screen-"+s).hidden = (s !== name));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function buddy(f, t){ $("face").textContent = f; $("bubble").textContent = t; }
+function confetti(){
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const box = document.createElement("div"); box.className = "confetti";
+  ["⭐","🎉","✨","🌟","🎈"].forEach(()=>{});
+  for(let i=0;i<14;i++){
+    const s = document.createElement("span"); s.className = "conf";
+    s.textContent = ["⭐","🎉","✨","🌟","🎈"][rnd(0,4)];
+    s.style.left = Math.random()*100 + "%"; s.style.top = (10+Math.random()*25) + "%";
+    s.style.animationDelay = (Math.random()*0.3) + "s";
+    box.appendChild(s);
+  }
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(), 1800);
+}
+
+/* ================= ПОДЕШАВАЊА ================= */
+document.querySelectorAll("[data-step]").forEach(b=>{
+  b.onclick = () => {
+    state.step = +b.dataset.step;
+    document.querySelectorAll("[data-step]").forEach(x=>x.setAttribute("aria-pressed", x===b));
+  };
+});
+$("btnMinNums").onclick = () => {
+  state.minNums = !state.minNums;
+  $("btnMinNums").setAttribute("aria-pressed", state.minNums);
+  $("btnMinNums").textContent = state.minNums ? "Бројеви минута на сату" : "Без бројева минута";
+};
+document.querySelectorAll("[data-mode]").forEach(b=>{
+  b.onclick = () => {
+    const m = b.dataset.mode;
+    if(m === "learn"){ buildLearn(); setScreen("learn"); return; }
+    startGame(m);
+  };
+});
+$("btnBack").onclick = () => setScreen("home");
+$("btnBack2").onclick = () => setScreen("home");
+$("btnHome").onclick = () => setScreen("home");
+$("btnAgain").onclick = () => startGame(state.mode);
+$("btnHint").onclick = () => {
+  const t = state.queue[state.idx];
+  let txt;
+  if(t.type === "read") txt = "Мала казаљка показује сате, велика минуте.<br>Велика казаљка је на броју <b>" +
+      (t.t.m === 0 ? "12" : Math.floor(t.t.m/5) + (t.t.m % 5 ? " и мало даље" : "")) + "</b>, а то је <b>" + t.t.m + " минута</b>.";
+  else if(t.type === "set") txt = "Прво постави малу казаљку на број <b>" + h12(t.t.h) +
+      "</b>, па велику на <b>" + t.t.m + " минута</b> (то је број " + (t.t.m/5 % 1 === 0 ? (t.t.m === 0 ? 12 : t.t.m/5) : "између бројева") + ").";
+  else txt = t.hint;
+  $("hintText").innerHTML = txt; $("hintText").hidden = false; state.usedHint = true;
+};
+
+/* ================= ТОК ИГРЕ ================= */
+function startGame(mode){
+  state.mode = mode; state.idx = 0; state.stars = 0; state.missed = []; state.doneMap = {};
+  state.queue = [];
+  for(let i=0;i<ROUND;i++){
+    state.queue.push(mode === "read" ? makeRead() : mode === "set" ? makeSet() :
+                     mode === "calc" ? makeCalc() : makeDay());
+  }
+  $("starCount").textContent = "0";
+  setScreen("game");
+  renderQuestion();
+}
+function renderDots(){
+  const d = $("dots"); d.innerHTML = "";
+  for(let i=0;i<ROUND;i++){
+    const s = document.createElement("span");
+    let c = "dot";
+    if(i < state.idx) c += state.doneMap[i] ? " done" : " miss";
+    else if(i === state.idx) c += " now";
+    s.className = c; d.appendChild(s);
+  }
+}
+
+function renderQuestion(){
+  state.tries = 0; state.usedHint = false;
+  const t = state.queue[state.idx];
+  const prompt = $("promptArea"), opts = $("options"), setA = $("setArea");
+  prompt.innerHTML = ""; opts.innerHTML = ""; setA.innerHTML = "";
+  opts.hidden = true; setA.hidden = true;
+  $("hintText").hidden = true;
+  renderDots(); buddy("🐿️", "Погледај добро казаљке!");
+
+  if(t.type === "read"){
+    $("ask").textContent = "Колико је сати?";
+    const c = clockMarkup(t.t.h, t.t.m, {});
+    prompt.innerHTML = c.html + '<div class="clock-legend"><span class="sq" style="background:var(--ink)"></span> сати &nbsp;&nbsp; <span class="sq" style="background:var(--coral)"></span> минути</div>';
+    opts.hidden = false;
+    const all = shuffle([t.t, ...t.wrong]);
+    all.forEach(v=>{
+      const b = document.createElement("button");
+      b.className = "opt"; b.textContent = digital(v.h, v.m);
+      b.onclick = () => choose(b, sameTime(v, t.t), digital(t.t.h, t.t.m) + " (" + words(t.t.h, t.t.m) + ")");
+      opts.appendChild(b);
+    });
+  }
+  else if(t.type === "set"){
+    $("ask").textContent = "Намести казаљке на:";
+    prompt.innerHTML = '<div class="digital">' + digital(t.t.h, t.t.m) + '</div>' +
+                       '<div class="wordtime">' + words(t.t.h, t.t.m) + '</div>';
+    state.set = { h:12, m:0 };
+    const c = clockMarkup(12, 0, {grab:true});
+    setA.hidden = false;
+    setA.innerHTML = c.html +
+      '<div class="clock-legend">Повуци <b>велику црвену</b> казаљку по ободу, а <b>малу црну</b> ближе средини.</div>' +
+      '<div class="setrow">' +
+        '<button class="stepbtn" data-adj="h-1">◂ сат</button>' +
+        '<button class="stepbtn" data-adj="h+1">сат ▸</button>' +
+        '<button class="stepbtn" data-adj="m-1">◂ мин</button>' +
+        '<button class="stepbtn" data-adj="m+1">мин ▸</button>' +
+      '</div>' +
+      '<div class="setrow"><span class="digital" id="setDigital" style="font-size:1.8rem">12:00</span></div>' +
+      '<div class="setrow"><button class="stepbtn check" id="btnCheck">✓ Провери</button></div>';
+    makeDraggable(c.id);
+    setA.querySelectorAll("[data-adj]").forEach(b=>{
+      b.onclick = () => {
+        const a = b.dataset.adj;
+        if(a === "h+1") state.set.h = state.set.h % 12 + 1;
+        if(a === "h-1") state.set.h = h12(state.set.h - 1);
+        if(a === "m+1") state.set.m = (state.set.m + state.step) % 60;
+        if(a === "m-1") state.set.m = (state.set.m - state.step + 60) % 60;
+        setHands(c.id, state.set.h, state.set.m);
+        $("setDigital").textContent = digital(state.set.h, state.set.m);
+      };
+    });
+    $("btnCheck").onclick = () => {
+      const ok = sameTime(state.set, t.t);
+      const box = $("setDigital");
+      if(ok){ box.style.background = "var(--mint)"; win(t, digital(t.t.h,t.t.m)); }
+      else {
+        box.style.background = "var(--coral)"; state.tries++;
+        buddy("🤔", "Још не. Провери коју казаљку треба померити.");
+        setTimeout(()=>{ box.style.background = "var(--ink)"; }, 800);
+      }
+    };
+  }
+  else if(t.type === "calc"){
+    $("ask").textContent = "Прочитај задатак и изабери одговор";
+    prompt.innerHTML = '<div class="story">' + t.q + "</div>";
+    opts.hidden = false;
+    shuffle([t.answer, ...calcOptions(t)]).forEach(v=>{
+      const b = document.createElement("button");
+      b.className = "opt"; b.textContent = v;
+      b.style.fontSize = v.length > 12 ? "1.15rem" : "";
+      b.onclick = () => choose(b, v === t.answer, t.answer);
+      opts.appendChild(b);
+    });
+  }
+  else {
+    $("ask").textContent = "Изабери тачан одговор";
+    prompt.innerHTML = '<div class="story">' + t.q + "</div>";
+    opts.hidden = false;
+    shuffle([t.answer, ...t.wrong]).forEach(v=>{
+      const b = document.createElement("button");
+      b.className = "opt"; b.textContent = v;
+      b.style.fontSize = v.length > 10 ? "1.15rem" : "";
+      b.onclick = () => choose(b, v === t.answer, t.answer);
+      opts.appendChild(b);
+    });
+  }
+}
+
+function choose(btn, ok, correctText){
+  if(btn.classList.contains("off") || btn.classList.contains("good")) return;
+  if(ok){
+    btn.classList.add("good");
+    document.querySelectorAll(".opt").forEach(x=>{ if(x!==btn) x.classList.add("off"); x.onclick = null; });
+    win(state.queue[state.idx], correctText);
+  } else {
+    btn.classList.add("bad"); state.tries++;
+    buddy("🤔", "Пробај поново — притисни 💡 ако треба помоћ.");
+    setTimeout(()=>{ btn.classList.remove("bad"); btn.classList.add("off"); btn.onclick = null; }, 500);
+  }
+}
+
+function taskLabel(t){
+  if(t.type === "read" || t.type === "set") return digital(t.t.h, t.t.m) + " — " + words(t.t.h, t.t.m);
+  if(t.type === "calc") return t.q.replace(/<[^>]+>/g,"") + "  →  " + t.answer;
+  return t.q.replace(/<[^>]+>/g,"") + "  →  " + t.answer;
+}
+function win(t, correctText){
+  const first = state.tries === 0 && !state.usedHint;
+  state.doneMap[state.idx] = first;
+  if(first){ state.stars++; confetti(); } else state.missed.push(taskLabel(t));
+  $("starCount").textContent = state.stars;
+  buddy(first ? "🥳" : "🙂", first ? "Браво! Тачно!" : "Тачно је " + correctText);
+  setTimeout(()=>{
+    state.idx++;
+    if(state.idx >= ROUND) showResult(); else renderQuestion();
+  }, 1500);
+}
+function showResult(){
+  const s = state.stars;
+  $("resScore").textContent = s;
+  $("resStars").textContent = "⭐".repeat(s) + "☆".repeat(ROUND - s);
+  let msg, emo;
+  if(s === ROUND){ msg = "Савршено! Читаш сат као прави мајстор."; emo = "🏆"; }
+  else if(s >= 7){ msg = "Одлично ти иде! Само настави."; emo = "🎉"; }
+  else if(s >= 4){ msg = "Добро — пробај још једном исту тачност."; emo = "💪"; }
+  else { msg = "Погледај „Како се чита сат“, па пробај лакшу тачност."; emo = "🌱"; }
+  $("resMsg").textContent = msg; $("resEmoji").textContent = emo;
+  const rev = $("review"), list = $("reviewList");
+  list.innerHTML = ""; rev.hidden = state.missed.length === 0;
+  state.missed.forEach(x=>{ const li = document.createElement("li"); li.textContent = x; list.appendChild(li); });
+  setScreen("result");
+}
+
+/* ================= УЧЕЊЕ ================= */
+function buildLearn(){
+  const demo = clockMarkup(8, 40, {});
+  const ex = [[3,0],[6,30],[9,15],[10,45],[7,20],[4,50]];
+  let exHtml = "";
+  ex.forEach(([h,m])=>{
+    const c = clockMarkup(h, m, {small:true});
+    exHtml += '<div class="ex">' + c.html + '<b>' + digital(h,m) + '</b><small>' + words(h,m) + '</small></div>';
+  });
+  $("learnBody").innerHTML = `
+    <div class="learn-block">
+      <h3>1. Две казаљке</h3>
+      <div class="learn-flex">
+        ${demo.html}
+        <div style="flex:1;min-width:220px">
+          <p><b>Мала црна казаљка</b> показује <b>сате</b>. Гледаш број који је већ прошла.</p>
+          <p><b>Велика црвена казаљка</b> показује <b>минуте</b>. Сваки број на сату вреди <b>5 минута</b>, зато бројиш 5, 10, 15, 20...</p>
+          <p>На овом сату мала казаљка је прошла 8, а велика је на броју 8 — то је 8 × 5 = <b>40 минута</b>. Значи <b>8:40</b>.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="learn-block">
+      <h3>2. Како се каже време</h3>
+      <p>Кад је велика казаљка у <b>десној половини</b> сата, бројиш <b>„и толико“</b>: 7:20 је „седам и двадесет“.</p>
+      <p>Кад пређе у <b>леву половину</b>, бројиш <b>колико фали до следећег сата</b>: 7:50 је „десет до осам“.</p>
+      <p>Посебни изрази: <b>:15</b> је „и петнаест“ (четврт), <b>:30</b> је „пола“ следећег сата, <b>:45</b> је „петнаест до“ следећег сата.</p>
+      <p style="color:var(--coral)">Пажња: <b>пола девет</b> значи <b>8:30</b>, а не 9:30 — половина је на путу ка деветом сату.</p>
+    </div>
+
+    <div class="learn-block">
+      <h3>3. Примери</h3>
+      <div class="ex-grid">${exHtml}</div>
+    </div>
+
+    <div class="learn-block">
+      <h3>4. Дан има 24 часа</h3>
+      <p>Казаљке обиђу круг два пута дневно, зато дигитални сат броји до 24.</p>
+      <p>После поднева се на број сати додаје 12: 1 поподне = <b>13:00</b>, 5 поподне = <b>17:00</b>, 9 увече = <b>21:00</b>.</p>
+      <p>Обрнуто, од броја већег од 12 одузимаш 12: 18:30 = <b>пола седам увече</b>.</p>
+    </div>
+
+    <div class="learn-block">
+      <h3>5. Мере за време</h3>
+      <p>1 сат = <b>60 минута</b> &nbsp;•&nbsp; 1 минут = <b>60 секунди</b> &nbsp;•&nbsp; 1 дан = <b>24 часа</b></p>
+      <p>Пола сата = 30 минута &nbsp;•&nbsp; четврт сата = 15 минута &nbsp;•&nbsp; три четврти сата = 45 минута</p>
+      <p>Кад рачунаш време, прво иди <b>до пуног сата</b>, па онда даље. Од 8:40 до 9:25: прво 20 минута до 9:00, па још 25 — укупно 45 минута.</p>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
