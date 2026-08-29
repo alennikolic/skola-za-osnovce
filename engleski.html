@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Енглески са Совом Оли</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@600;700;800&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2A4A;
+    --paper:#FFF8EC;
+    --dot:#E7D9BE;
+    --sun:#FFC93C;
+    --coral:#FF6B5B;
+    --mint:#2ED9A0;
+    --grape:#8C6BEA;
+    --sky:#4CC3F0;
+    --card:#FFFFFF;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Nunito','Segoe UI',Tahoma,sans-serif;
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:radial-gradient(var(--dot) 1.6px, transparent 1.7px);
+    background-size:24px 24px;
+    min-height:100vh;
+    padding:18px 14px 60px;
+  }
+  h1,h2,h3,.display{font-family:'Rubik','Nunito',Arial,sans-serif}
+
+  .wrap{max-width:820px;margin:0 auto}
+
+  /* ---------- заглавље ---------- */
+  .topbar{
+    display:flex;align-items:center;gap:14px;
+    background:var(--card);border:3px solid var(--ink);border-radius:22px;
+    box-shadow:0 6px 0 var(--ink);
+    padding:14px 18px;margin-bottom:18px;
+  }
+  .owl{font-size:2.6rem;line-height:1;flex:none}
+  .topbar h1{font-size:1.35rem;margin:0}
+  .topbar p{margin:2px 0 0;font-size:.9rem;font-weight:700;opacity:.65}
+
+  /* ---------- контроле ---------- */
+  .panel{
+    background:var(--card);border:3px solid var(--ink);border-radius:22px;
+    box-shadow:0 6px 0 var(--ink);padding:18px;margin-bottom:18px;
+  }
+  .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+  .row:last-child{margin-bottom:0}
+  .row-label{font-weight:900;font-size:.95rem;min-width:90px}
+  .chip{
+    font-family:inherit;font-weight:900;font-size:.95rem;
+    background:#fff;color:var(--ink);border:3px solid var(--ink);
+    border-radius:999px;padding:8px 16px;cursor:pointer;
+    box-shadow:0 3px 0 var(--ink);transition:transform .08s, background .2s;
+  }
+  .chip:hover{background:#F1F7FF}
+  .chip:active{transform:translateY(3px);box-shadow:0 0 0 var(--ink)}
+  .chip[aria-pressed="true"]{background:var(--sun)}
+  select.chip{padding-right:12px;appearance:none;-webkit-appearance:none}
+
+  /* ---------- избор игре ---------- */
+  .modes{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .mode{
+    text-align:left;font-family:inherit;cursor:pointer;color:var(--ink);
+    border:3px solid var(--ink);border-radius:22px;box-shadow:0 6px 0 var(--ink);
+    padding:18px;transition:transform .08s;
+  }
+  .mode:active{transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+  .mode .ic{font-size:2.2rem;display:block;margin-bottom:6px}
+  .mode b{font-family:'Rubik',Arial,sans-serif;font-size:1.1rem;display:block}
+  .mode span.sub{font-size:.85rem;font-weight:700;opacity:.75}
+  .m1{background:var(--sun)}
+  .m2{background:var(--sky)}
+  .m3{background:var(--mint)}
+  .m4{background:var(--coral)}
+  .m5{background:#fff;grid-column:1 / -1}
+
+  /* ---------- игра ---------- */
+  .gamebar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .dots{display:flex;gap:6px;flex:1;flex-wrap:wrap}
+  .dot{width:14px;height:14px;border-radius:50%;border:2.5px solid var(--ink);background:#fff}
+  .dot.done{background:var(--mint)}
+  .dot.miss{background:var(--coral)}
+  .dot.now{background:var(--sun);transform:scale(1.25)}
+
+  .stage{text-align:center;padding:22px 18px}
+  .ask{font-size:1rem;font-weight:800;opacity:.7;margin-bottom:10px}
+  .big-emoji{font-size:5.5rem;line-height:1.1;margin:6px 0 14px}
+  /* Српске речи у задатку — велика штампана слова */
+  .big-word{
+    font-family:'Rubik',Arial,sans-serif;font-size:2.4rem;font-weight:700;
+    margin:10px 0 18px;color:var(--grape);
+    text-transform:uppercase;letter-spacing:1.5px;
+  }
+  .hint-word{
+    font-size:1.15rem;font-weight:900;opacity:.75;margin-bottom:14px;
+    text-transform:uppercase;letter-spacing:1px;
+  }
+  /* ниједан ћирилични текст не сме бити курзиван (писана слова) */
+  body, body *{font-style:normal !important;font-synthesis:none}
+
+  .speaker{
+    font-size:3.4rem;background:var(--sky);border:3px solid var(--ink);
+    border-radius:26px;box-shadow:0 6px 0 var(--ink);padding:18px 34px;
+    cursor:pointer;margin-bottom:8px;transition:transform .08s;
+  }
+  .speaker:active{transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+  .opt{
+    font-family:'Rubik',Arial,sans-serif;font-weight:700;font-size:1.5rem;
+    background:#fff;color:var(--ink);border:3px solid var(--ink);
+    border-radius:18px;box-shadow:0 5px 0 var(--ink);
+    padding:18px 10px;cursor:pointer;transition:transform .08s, background .2s;
+    word-break:break-word;
+  }
+  .opt.emoji-opt{font-size:3rem;padding:14px 10px}
+  .opt:hover{background:#F1F7FF}
+  .opt:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+  .opt.good{background:var(--mint);color:#fff}
+  .opt.bad{background:var(--coral);color:#fff;animation:shake .35s}
+  .opt.off{opacity:.35;cursor:default}
+  @keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+  /* ---------- слагање речи ---------- */
+  .slots{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:6px 0 18px}
+  .slot{
+    width:46px;height:56px;border:3px dashed var(--ink);border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Rubik',Arial,sans-serif;font-size:1.7rem;font-weight:700;background:#fff;
+  }
+  .slot.filled{border-style:solid;background:var(--sun);cursor:pointer}
+  .slot.ok{background:var(--mint);border-style:solid;color:#fff}
+  .slot.no{background:var(--coral);border-style:solid;color:#fff;animation:shake .35s}
+  .letters{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+  .letter{
+    font-family:'Rubik',Arial,sans-serif;font-size:1.5rem;font-weight:700;
+    width:52px;height:52px;background:#fff;border:3px solid var(--ink);
+    border-radius:14px;box-shadow:0 4px 0 var(--ink);cursor:pointer;
+  }
+  .letter:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+  .letter.used{opacity:.25;cursor:default}
+
+  /* ---------- сова и порука ---------- */
+  .buddy{display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;margin-top:16px}
+  .buddy .face{font-size:2.4rem}
+  .bubble{
+    background:var(--paper);border:3px solid var(--ink);border-radius:16px;
+    padding:8px 14px;font-weight:900;font-size:1.05rem;
+  }
+
+  /* ---------- резултат ---------- */
+  .result{text-align:center;padding:26px 18px}
+  .result .score-big{font-family:'Rubik',Arial,sans-serif;font-size:3.4rem;font-weight:700;margin:8px 0}
+  .stars{font-size:1.8rem;letter-spacing:4px;margin-bottom:10px}
+  .review{text-align:left;margin:18px auto 0;max-width:420px}
+  .review h3{font-size:1rem;margin:0 0 8px}
+  .review ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+  .review li{
+    background:var(--paper);border:2.5px solid var(--ink);border-radius:14px;
+    padding:8px 12px;font-weight:800;display:flex;align-items:center;gap:10px;
+  }
+
+  /* ---------- речник ---------- */
+  .dict-group{margin-bottom:22px}
+  .dict-group h3{font-size:1.1rem;margin:0 0 10px;padding-bottom:6px;border-bottom:3px solid var(--dot)}
+  .dict-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+  .word{
+    background:var(--paper);border:2.5px solid var(--ink);border-radius:16px;
+    padding:12px;cursor:pointer;text-align:left;font-family:inherit;color:var(--ink);
+    display:flex;gap:10px;align-items:center;width:100%;
+  }
+  .word:hover{background:#fff}
+  .word .we{font-size:1.8rem;flex:none}
+  .word b{display:block;font-family:'Rubik',Arial,sans-serif;font-size:1.05rem}
+  .word small{font-weight:800;opacity:.7}
+
+  .footer-note{text-align:center;font-size:.85rem;font-weight:700;opacity:.6;margin-top:8px}
+  [hidden]{display:none !important}
+  button:focus-visible{outline:4px dashed var(--grape);outline-offset:3px}
+
+  .confetti{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:50}
+  .conf{position:absolute;font-size:1.5rem;animation:fall 1.2s ease-in forwards}
+  @keyframes fall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(60vh) rotate(320deg);opacity:0}}
+
+  @media (max-width:480px){
+    .modes{grid-template-columns:1fr}
+    .big-emoji{font-size:4.2rem}
+    .big-word{font-size:2rem}
+    .opt{font-size:1.2rem;padding:14px 8px}
+    .row-label{min-width:100%}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none !important;transition:none !important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="owl" id="owlTop">🦉</span>
+    <div>
+      <h1>Енглески са Совом Оли</h1>
+      <p>Учи енглеске речи кроз игру</p>
+    </div>
+  </div>
+
+  <!-- ================= ПОЧЕТНА ================= -->
+  <section id="screen-home">
+    <div class="panel">
+      <div class="row">
+        <span class="row-label">Разред:</span>
+        <button class="chip" data-level="1" aria-pressed="true">1. разред</button>
+        <button class="chip" data-level="2" aria-pressed="false">2. разред</button>
+        <button class="chip" data-level="3" aria-pressed="false">3. разред</button>
+      </div>
+      <div class="row">
+        <span class="row-label">Област:</span>
+        <select class="chip" id="catSelect"></select>
+        <span id="poolInfo" style="font-weight:800;opacity:.6;font-size:.9rem"></span>
+      </div>
+    </div>
+
+    <div class="modes">
+      <button class="mode m1" data-mode="picture">
+        <span class="ic">🖼️</span>
+        <b>Погоди слику</b>
+        <span class="sub">Видиш слику, бираш енглеску реч</span>
+      </button>
+      <button class="mode m2" data-mode="listen">
+        <span class="ic">🎧</span>
+        <b>Слушај и погоди</b>
+        <span class="sub">Оли изговара реч, ти бираш слику</span>
+      </button>
+      <button class="mode m3" data-mode="translate">
+        <span class="ic">🔁</span>
+        <b>Преведи реч</b>
+        <span class="sub">Српска реч → енглеска реч</span>
+      </button>
+      <button class="mode m4" data-mode="spell">
+        <span class="ic">🔤</span>
+        <b>Састави реч</b>
+        <span class="sub">Ређај слова по реду</span>
+      </button>
+      <button class="mode m5" data-mode="dict">
+        <span class="ic">📖</span>
+        <b>Речник</b>
+        <span class="sub">Прегледај све речи и слушај изговор</span>
+      </button>
+    </div>
+    <p class="footer-note">Савет: укључи звук да чујеш изговор. 🔊</p>
+  </section>
+
+  <!-- ================= ИГРА ================= -->
+  <section id="screen-game" hidden>
+    <div class="gamebar">
+      <button class="chip" id="btnBack">◂ Назад</button>
+      <div class="dots" id="dots"></div>
+      <span class="chip" style="cursor:default;box-shadow:none">⭐ <b id="starCount">0</b></span>
+    </div>
+
+    <div class="panel stage">
+      <div class="ask" id="ask"></div>
+      <div id="promptArea"></div>
+      <div class="options" id="options"></div>
+      <div id="spellArea" hidden>
+        <div class="slots" id="slots"></div>
+        <div class="letters" id="letters"></div>
+      </div>
+      <div class="buddy">
+        <span class="face" id="owlFace">🦉</span>
+        <span class="bubble" id="bubble">Хајде да учимо!</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= РЕЗУЛТАТ ================= -->
+  <section id="screen-result" hidden>
+    <div class="panel result">
+      <div id="resEmoji" style="font-size:4rem">🏆</div>
+      <div class="score-big"><span id="resScore">0</span> / <span id="resTotal">10</span></div>
+      <div class="stars" id="resStars"></div>
+      <p style="font-weight:900;font-size:1.2rem" id="resMsg"></p>
+      <div class="review" id="review" hidden>
+        <h3>Речи за вежбање:</h3>
+        <ul id="reviewList"></ul>
+      </div>
+      <div class="row" style="justify-content:center;margin-top:20px">
+        <button class="chip" id="btnAgain" style="background:var(--mint)">🔁 Играј поново</button>
+        <button class="chip" id="btnHome">🏠 Почетна</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= РЕЧНИК ================= -->
+  <section id="screen-dict" hidden>
+    <div class="gamebar">
+      <button class="chip" id="btnBack2">◂ Назад</button>
+      <span style="font-weight:900">Кликни на реч да чујеш изговор 🔊</span>
+    </div>
+    <div class="panel" id="dictBody"></div>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================
+   РЕЧНИК:  e = енглески, s = српски, i = емоџи,
+            c = област,   l = разред, p = може у сликовним играма
+   ========================================================= */
+const CATS = {
+  animals:"Животиње 🐾", colors:"Боје 🎨", numbers:"Бројеви 🔢",
+  family:"Породица 👨‍👩‍👧", food:"Храна 🍎", school:"Школа 🎒",
+  body:"Тело 🖐️", clothes:"Одећа 👕", home:"Кућа 🏠",
+  nature:"Природа и време 🌳", timec:"Дани и годишња доба 📅",
+  verbs:"Радње 🏃", phrases:"Изрази 💬"
+};
+
+const WORDS = [
+  // --- животиње ---
+  {e:"cat",s:"мачка",i:"🐱",c:"animals",l:1},
+  {e:"dog",s:"пас",i:"🐶",c:"animals",l:1},
+  {e:"cow",s:"крава",i:"🐮",c:"animals",l:1},
+  {e:"pig",s:"свиња",i:"🐷",c:"animals",l:1},
+  {e:"horse",s:"коњ",i:"🐴",c:"animals",l:1},
+  {e:"sheep",s:"овца",i:"🐑",c:"animals",l:2},
+  {e:"mouse",s:"миш",i:"🐭",c:"animals",l:1},
+  {e:"rabbit",s:"зец",i:"🐰",c:"animals",l:2},
+  {e:"bear",s:"медвед",i:"🐻",c:"animals",l:1},
+  {e:"lion",s:"лав",i:"🦁",c:"animals",l:1},
+  {e:"tiger",s:"тигар",i:"🐯",c:"animals",l:2},
+  {e:"monkey",s:"мајмун",i:"🐵",c:"animals",l:2},
+  {e:"elephant",s:"слон",i:"🐘",c:"animals",l:2},
+  {e:"frog",s:"жаба",i:"🐸",c:"animals",l:1},
+  {e:"fish",s:"риба",i:"🐟",c:"animals",l:1},
+  {e:"bird",s:"птица",i:"🐦",c:"animals",l:1},
+  {e:"bee",s:"пчела",i:"🐝",c:"animals",l:2},
+  {e:"duck",s:"патка",i:"🦆",c:"animals",l:2},
+  {e:"fox",s:"лисица",i:"🦊",c:"animals",l:2},
+  {e:"wolf",s:"вук",i:"🐺",c:"animals",l:3},
+  {e:"turtle",s:"корњача",i:"🐢",c:"animals",l:3},
+  {e:"butterfly",s:"лептир",i:"🦋",c:"animals",l:3},
+  {e:"snake",s:"змија",i:"🐍",c:"animals",l:3},
+
+  // --- боје ---
+  {e:"red",s:"црвена",i:"🔴",c:"colors",l:1},
+  {e:"blue",s:"плава",i:"🔵",c:"colors",l:1},
+  {e:"green",s:"зелена",i:"🟢",c:"colors",l:1},
+  {e:"yellow",s:"жута",i:"🟡",c:"colors",l:1},
+  {e:"black",s:"црна",i:"⚫",c:"colors",l:1},
+  {e:"white",s:"бела",i:"⚪",c:"colors",l:1},
+  {e:"orange",s:"наранџаста",i:"🟠",c:"colors",l:2},
+  {e:"purple",s:"љубичаста",i:"🟣",c:"colors",l:2},
+  {e:"brown",s:"браон",i:"🟤",c:"colors",l:2},
+  {e:"pink",s:"розе",i:"🌸",c:"colors",l:2},
+
+  // --- бројеви ---
+  {e:"one",s:"један",i:"1️⃣",c:"numbers",l:1},
+  {e:"two",s:"два",i:"2️⃣",c:"numbers",l:1},
+  {e:"three",s:"три",i:"3️⃣",c:"numbers",l:1},
+  {e:"four",s:"четири",i:"4️⃣",c:"numbers",l:1},
+  {e:"five",s:"пет",i:"5️⃣",c:"numbers",l:1},
+  {e:"six",s:"шест",i:"6️⃣",c:"numbers",l:1},
+  {e:"seven",s:"седам",i:"7️⃣",c:"numbers",l:1},
+  {e:"eight",s:"осам",i:"8️⃣",c:"numbers",l:1},
+  {e:"nine",s:"девет",i:"9️⃣",c:"numbers",l:1},
+  {e:"ten",s:"десет",i:"🔟",c:"numbers",l:1},
+  {e:"eleven",s:"једанаест",i:"11",c:"numbers",l:3},
+  {e:"twelve",s:"дванаест",i:"12",c:"numbers",l:3},
+  {e:"twenty",s:"двадесет",i:"20",c:"numbers",l:3},
+
+  // --- породица ---
+  {e:"mother",s:"мама",i:"👩",c:"family",l:1},
+  {e:"father",s:"тата",i:"👨",c:"family",l:1},
+  {e:"sister",s:"сестра",i:"👧",c:"family",l:1},
+  {e:"brother",s:"брат",i:"👦",c:"family",l:1},
+  {e:"grandmother",s:"бака",i:"👵",c:"family",l:2},
+  {e:"grandfather",s:"деда",i:"👴",c:"family",l:2},
+  {e:"baby",s:"беба",i:"👶",c:"family",l:1},
+  {e:"family",s:"породица",i:"👨‍👩‍👧",c:"family",l:2},
+  {e:"friend",s:"друг",i:"🤝",c:"family",l:2},
+
+  // --- храна ---
+  {e:"apple",s:"јабука",i:"🍎",c:"food",l:1},
+  {e:"banana",s:"банана",i:"🍌",c:"food",l:1},
+  {e:"bread",s:"хлеб",i:"🍞",c:"food",l:1},
+  {e:"milk",s:"млеко",i:"🥛",c:"food",l:1},
+  {e:"water",s:"вода",i:"💧",c:"food",l:1},
+  {e:"cheese",s:"сир",i:"🧀",c:"food",l:2},
+  {e:"egg",s:"јаје",i:"🥚",c:"food",l:2},
+  {e:"cake",s:"торта",i:"🍰",c:"food",l:2},
+  {e:"ice cream",s:"сладолед",i:"🍦",c:"food",l:2},
+  {e:"grapes",s:"грожђе",i:"🍇",c:"food",l:2},
+  {e:"strawberry",s:"јагода",i:"🍓",c:"food",l:3},
+  {e:"carrot",s:"шаргарепа",i:"🥕",c:"food",l:2},
+  {e:"tomato",s:"парадајз",i:"🍅",c:"food",l:3},
+  {e:"potato",s:"кромпир",i:"🥔",c:"food",l:3},
+  {e:"soup",s:"супа",i:"🍲",c:"food",l:2},
+  {e:"juice",s:"сок",i:"🧃",c:"food",l:2},
+
+  // --- школа ---
+  {e:"book",s:"књига",i:"📕",c:"school",l:1},
+  {e:"pencil",s:"оловка",i:"✏️",c:"school",l:1},
+  {e:"pen",s:"хемијска",i:"🖊️",c:"school",l:1},
+  {e:"bag",s:"ранац",i:"🎒",c:"school",l:1},
+  {e:"ruler",s:"лењир",i:"📏",c:"school",l:2},
+  {e:"scissors",s:"маказе",i:"✂️",c:"school",l:3},
+  {e:"notebook",s:"свеска",i:"📓",c:"school",l:2},
+  {e:"school",s:"школа",i:"🏫",c:"school",l:1},
+  {e:"teacher",s:"учитељица",i:"👩‍🏫",c:"school",l:2},
+  {e:"crayon",s:"бојица",i:"🖍️",c:"school",l:2},
+  {e:"computer",s:"рачунар",i:"💻",c:"school",l:3},
+
+  // --- тело ---
+  {e:"hand",s:"рука",i:"✋",c:"body",l:1},
+  {e:"eye",s:"око",i:"👁️",c:"body",l:1},
+  {e:"ear",s:"уво",i:"👂",c:"body",l:1},
+  {e:"nose",s:"нос",i:"👃",c:"body",l:1},
+  {e:"mouth",s:"уста",i:"👄",c:"body",l:2},
+  {e:"tooth",s:"зуб",i:"🦷",c:"body",l:2},
+  {e:"foot",s:"стопало",i:"🦶",c:"body",l:2},
+  {e:"leg",s:"нога",i:"🦵",c:"body",l:2},
+
+  // --- одећа ---
+  {e:"shirt",s:"мајица",i:"👕",c:"clothes",l:2},
+  {e:"dress",s:"хаљина",i:"👗",c:"clothes",l:2},
+  {e:"shoes",s:"патике",i:"👟",c:"clothes",l:2},
+  {e:"hat",s:"шешир",i:"🎩",c:"clothes",l:2},
+  {e:"socks",s:"чарапе",i:"🧦",c:"clothes",l:2},
+  {e:"coat",s:"капут",i:"🧥",c:"clothes",l:3},
+  {e:"trousers",s:"панталоне",i:"👖",c:"clothes",l:3},
+  {e:"gloves",s:"рукавице",i:"🧤",c:"clothes",l:3},
+
+  // --- кућа ---
+  {e:"house",s:"кућа",i:"🏠",c:"home",l:1},
+  {e:"door",s:"врата",i:"🚪",c:"home",l:2},
+  {e:"window",s:"прозор",i:"🪟",c:"home",l:2},
+  {e:"bed",s:"кревет",i:"🛏️",c:"home",l:1},
+  {e:"chair",s:"столица",i:"🪑",c:"home",l:2},
+  {e:"key",s:"кључ",i:"🔑",c:"home",l:2},
+  {e:"lamp",s:"лампа",i:"💡",c:"home",l:2},
+  {e:"clock",s:"сат",i:"🕐",c:"home",l:2},
+  {e:"phone",s:"телефон",i:"📱",c:"home",l:2},
+  {e:"mirror",s:"огледало",i:"🪞",c:"home",l:3},
+
+  // --- природа ---
+  {e:"sun",s:"сунце",i:"☀️",c:"nature",l:1},
+  {e:"moon",s:"месец",i:"🌙",c:"nature",l:1},
+  {e:"star",s:"звезда",i:"⭐",c:"nature",l:1},
+  {e:"cloud",s:"облак",i:"☁️",c:"nature",l:2},
+  {e:"rain",s:"киша",i:"🌧️",c:"nature",l:2},
+  {e:"snow",s:"снег",i:"❄️",c:"nature",l:2},
+  {e:"tree",s:"дрво",i:"🌳",c:"nature",l:1},
+  {e:"flower",s:"цвет",i:"🌼",c:"nature",l:1},
+  {e:"sea",s:"море",i:"🌊",c:"nature",l:2},
+  {e:"mountain",s:"планина",i:"⛰️",c:"nature",l:3},
+  {e:"rainbow",s:"дуга",i:"🌈",c:"nature",l:3},
+  {e:"fire",s:"ватра",i:"🔥",c:"nature",l:3},
+
+  // --- дани и годишња доба ---
+  {e:"Monday",s:"понедељак",i:"📅",c:"timec",l:3,p:0},
+  {e:"Tuesday",s:"уторак",i:"📅",c:"timec",l:3,p:0},
+  {e:"Wednesday",s:"среда",i:"📅",c:"timec",l:3,p:0},
+  {e:"Thursday",s:"четвртак",i:"📅",c:"timec",l:3,p:0},
+  {e:"Friday",s:"петак",i:"📅",c:"timec",l:3,p:0},
+  {e:"Saturday",s:"субота",i:"📅",c:"timec",l:3,p:0},
+  {e:"Sunday",s:"недеља",i:"📅",c:"timec",l:3,p:0},
+  {e:"spring",s:"пролеће",i:"🌷",c:"timec",l:3},
+  {e:"summer",s:"лето",i:"🏖️",c:"timec",l:3},
+  {e:"autumn",s:"јесен",i:"🍂",c:"timec",l:3},
+  {e:"winter",s:"зима",i:"⛄",c:"timec",l:3},
+
+  // --- радње ---
+  {e:"run",s:"трчати",i:"🏃",c:"verbs",l:2},
+  {e:"jump",s:"скакати",i:"🤸",c:"verbs",l:2},
+  {e:"swim",s:"пливати",i:"🏊",c:"verbs",l:2},
+  {e:"sing",s:"певати",i:"🎤",c:"verbs",l:2},
+  {e:"read",s:"читати",i:"📖",c:"verbs",l:2},
+  {e:"write",s:"писати",i:"✍️",c:"verbs",l:3},
+  {e:"eat",s:"јести",i:"🍽️",c:"verbs",l:2},
+  {e:"drink",s:"пити",i:"🥤",c:"verbs",l:2},
+  {e:"sleep",s:"спавати",i:"😴",c:"verbs",l:2},
+  {e:"play",s:"играти се",i:"⚽",c:"verbs",l:2},
+  {e:"walk",s:"ходати",i:"🚶",c:"verbs",l:3},
+  {e:"dance",s:"плесати",i:"💃",c:"verbs",l:3},
+  {e:"draw",s:"цртати",i:"🖌️",c:"verbs",l:3},
+
+  // --- изрази ---
+  {e:"hello",s:"здраво",i:"👋",c:"phrases",l:1,p:0},
+  {e:"goodbye",s:"довиђења",i:"🙋",c:"phrases",l:1,p:0},
+  {e:"please",s:"молим",i:"🙏",c:"phrases",l:1,p:0},
+  {e:"thank you",s:"хвала",i:"💐",c:"phrases",l:1,p:0},
+  {e:"sorry",s:"извини",i:"😔",c:"phrases",l:2,p:0},
+  {e:"yes",s:"да",i:"✅",c:"phrases",l:1,p:0},
+  {e:"no",s:"не",i:"❌",c:"phrases",l:1,p:0},
+  {e:"good morning",s:"добро јутро",i:"🌅",c:"phrases",l:2,p:0},
+  {e:"good night",s:"лаку ноћ",i:"🌜",c:"phrases",l:2,p:0}
+];
+
+const ROUND = 10;
+const state = { level:1, cat:"all", mode:null, queue:[], idx:0, stars:0, tries:0, missed:[] };
+
+/* ---------- изговор ---------- */
+let voices = [];
+function loadVoices(){ voices = window.speechSynthesis ? speechSynthesis.getVoices() : []; }
+if (window.speechSynthesis){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+function say(text){
+  if(!window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  const v = voices.find(x=>/^en-GB/i.test(x.lang)) || voices.find(x=>/^en/i.test(x.lang));
+  if(v) u.voice = v;
+  u.lang = v ? v.lang : "en-US";
+  u.rate = 0.8; u.pitch = 1.05;
+  speechSynthesis.speak(u);
+}
+
+/* ---------- помоћне ---------- */
+const $ = id => document.getElementById(id);
+const shuffle = a => a.slice().sort(()=>Math.random()-0.5);
+const canPic = w => w.p !== 0;
+
+function pool(mode){
+  let list = WORDS.filter(w => w.l <= state.level);
+  if(state.cat !== "all") list = list.filter(w => w.c === state.cat);
+  if(mode === "picture" || mode === "listen") list = list.filter(canPic);
+  if(mode === "spell"){
+    const max = state.level === 1 ? 5 : state.level === 2 ? 7 : 10;
+    list = list.filter(w => !w.e.includes(" ") && w.e.length <= max && w.e.length >= 2);
+  }
+  return list;
+}
+
+function setScreen(name){
+  ["home","game","result","dict"].forEach(s => $("screen-"+s).hidden = (s !== name));
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function buddy(face, text){ $("owlFace").textContent = face; $("bubble").textContent = text; }
+
+function confetti(){
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const box = document.createElement("div");
+  box.className = "confetti";
+  const pieces = ["⭐","🎉","✨","🌟","🎈"];
+  for(let i=0;i<14;i++){
+    const s = document.createElement("span");
+    s.className = "conf";
+    s.textContent = pieces[Math.floor(Math.random()*pieces.length)];
+    s.style.left = Math.random()*100 + "%";
+    s.style.top = (10 + Math.random()*25) + "%";
+    s.style.animationDelay = (Math.random()*0.3) + "s";
+    box.appendChild(s);
+  }
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(), 1800);
+}
+
+/* ---------- подешавања ---------- */
+function buildCatSelect(){
+  const sel = $("catSelect");
+  sel.innerHTML = '<option value="all">Све области</option>';
+  Object.keys(CATS).forEach(k=>{
+    if(WORDS.some(w => w.c === k && w.l <= state.level)){
+      const o = document.createElement("option");
+      o.value = k; o.textContent = CATS[k];
+      sel.appendChild(o);
+    }
+  });
+  if(![...sel.options].some(o=>o.value===state.cat)) state.cat = "all";
+  sel.value = state.cat;
+  updatePoolInfo();
+}
+function updatePoolInfo(){
+  $("poolInfo").textContent = pool("translate").length + " речи";
+}
+
+document.querySelectorAll("[data-level]").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    state.level = +btn.dataset.level;
+    document.querySelectorAll("[data-level]").forEach(b=>b.setAttribute("aria-pressed", b===btn));
+    buildCatSelect();
+  });
+});
+$("catSelect").addEventListener("change", e=>{ state.cat = e.target.value; updatePoolInfo(); });
+
+document.querySelectorAll("[data-mode]").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const m = btn.dataset.mode;
+    if(m === "dict"){ buildDict(); setScreen("dict"); return; }
+    startGame(m);
+  });
+});
+$("btnBack").addEventListener("click", ()=>{ speechSynthesis && speechSynthesis.cancel(); setScreen("home"); });
+$("btnBack2").addEventListener("click", ()=> setScreen("home"));
+$("btnHome").addEventListener("click", ()=> setScreen("home"));
+$("btnAgain").addEventListener("click", ()=> startGame(state.mode));
+
+/* ---------- ток игре ---------- */
+function startGame(mode){
+  const list = pool(mode);
+  if(list.length < 4){
+    alert("У овој области нема довољно речи за ову игру. Изабери другу област или виши разред.");
+    return;
+  }
+  state.mode = mode; state.stars = 0; state.idx = 0; state.missed = [];
+  let q = shuffle(list);
+  while(q.length < ROUND) q = q.concat(shuffle(list));
+  state.queue = q.slice(0, ROUND);
+  $("starCount").textContent = "0";
+  setScreen("game");
+  renderQuestion();
+}
+
+function renderDots(){
+  const d = $("dots"); d.innerHTML = "";
+  for(let i=0;i<ROUND;i++){
+    const s = document.createElement("span");
+    s.className = "dot" + (i < state.idx ? (state.doneMap && state.doneMap[i] === false ? " miss" : " done") : (i === state.idx ? " now" : ""));
+    d.appendChild(s);
+  }
+}
+state.doneMap = {};
+
+function renderQuestion(){
+  state.tries = 0;
+  const w = state.queue[state.idx];
+  const opts = $("options"), spell = $("spellArea"), prompt = $("promptArea");
+  opts.innerHTML = ""; prompt.innerHTML = ""; spell.hidden = true; opts.hidden = false;
+  renderDots();
+  buddy("🦉", "Хајде да учимо!");
+
+  if(state.mode === "picture"){
+    $("ask").textContent = "Шта је ово на енглеском?";
+    prompt.innerHTML = '<div class="big-emoji">' + w.i + '</div><div class="hint-word">' + w.s + '</div>';
+    makeChoices(w, "text");
+  }
+  else if(state.mode === "translate"){
+    $("ask").textContent = "Која је енглеска реч?";
+    prompt.innerHTML = '<div class="big-word">' + w.s + '</div>';
+    makeChoices(w, "text");
+  }
+  else if(state.mode === "listen"){
+    $("ask").textContent = "Слушај реч и изабери слику";
+    const b = document.createElement("button");
+    b.className = "speaker"; b.textContent = "🔊";
+    b.setAttribute("aria-label", "Понови реч");
+    b.onclick = () => say(w.e);
+    prompt.appendChild(b);
+    setTimeout(()=>say(w.e), 350);
+    makeChoices(w, "emoji");
+  }
+  else if(state.mode === "spell"){
+    $("ask").textContent = "Састави енглеску реч од слова";
+    prompt.innerHTML = '<div class="big-emoji">' + w.i + '</div><div class="hint-word">' + w.s + '</div>';
+    opts.hidden = true; spell.hidden = false;
+    buildSpell(w);
+  }
+}
+
+function makeChoices(w, kind){
+  const box = $("options");
+  const same = pool(state.mode).filter(x => x.c === w.c && x.e !== w.e);
+  const any  = pool(state.mode).filter(x => x.e !== w.e);
+  const src  = same.length >= 3 ? same : any;
+  const wrong = shuffle(src).slice(0,3);
+  shuffle([w, ...wrong]).forEach(o=>{
+    const b = document.createElement("button");
+    b.className = "opt" + (kind === "emoji" ? " emoji-opt" : "");
+    b.textContent = kind === "emoji" ? o.i : o.e;
+    if(kind === "emoji") b.setAttribute("aria-label", o.s);
+    b.onclick = () => pick(o, w, b);
+    box.appendChild(b);
+  });
+}
+
+function pick(chosen, correct, btn){
+  if(btn.classList.contains("off") || btn.classList.contains("good")) return;
+  if(chosen.e === correct.e){
+    btn.classList.add("good");
+    document.querySelectorAll(".opt").forEach(b=>{ if(b!==btn) b.classList.add("off"); b.onclick=null; });
+    win(correct);
+  } else {
+    btn.classList.add("bad");
+    state.tries++;
+    buddy("🤔", "Пробај поново!");
+    setTimeout(()=>{ btn.classList.remove("bad"); btn.classList.add("off"); btn.onclick=null; }, 500);
+  }
+}
+
+/* ---------- слагање речи ---------- */
+let spellState = null;
+function buildSpell(w){
+  const target = w.e.toLowerCase();
+  spellState = { target, filled:[] };
+  const slots = $("slots"), letters = $("letters");
+  slots.innerHTML = ""; letters.innerHTML = "";
+
+  target.split("").forEach((_,i)=>{
+    const s = document.createElement("div");
+    s.className = "slot"; s.dataset.i = i;
+    s.onclick = () => undoLetter(i);
+    slots.appendChild(s);
+  });
+
+  let bank = target.split("");
+  if(target.length < 6){
+    const extra = "abcdefghijklmnoprstuvwy";
+    while(bank.length < target.length + 2) bank.push(extra[Math.floor(Math.random()*extra.length)]);
+  }
+  shuffle(bank).forEach((ch,i)=>{
+    const b = document.createElement("button");
+    b.className = "letter"; b.textContent = ch; b.dataset.k = i;
+    b.onclick = () => addLetter(ch, b);
+    letters.appendChild(b);
+  });
+}
+function addLetter(ch, btn){
+  if(btn.classList.contains("used") || !spellState) return;
+  if(spellState.filled.length >= spellState.target.length) return;
+  spellState.filled.push({ch, btn});
+  btn.classList.add("used");
+  paintSlots();
+  if(spellState.filled.length === spellState.target.length) checkSpell();
+}
+function undoLetter(i){
+  if(!spellState || !spellState.filled[i]) return;
+  if(spellState.filled.length - 1 !== i) return; // склања се само последње слово
+  const last = spellState.filled.pop();
+  last.btn.classList.remove("used");
+  paintSlots();
+}
+function paintSlots(){
+  document.querySelectorAll("#slots .slot").forEach((s,i)=>{
+    const f = spellState.filled[i];
+    s.textContent = f ? f.ch : "";
+    s.className = "slot" + (f ? " filled" : "");
+  });
+}
+function checkSpell(){
+  const w = state.queue[state.idx];
+  const guess = spellState.filled.map(f=>f.ch).join("");
+  const slots = document.querySelectorAll("#slots .slot");
+  if(guess === spellState.target){
+    slots.forEach(s=>s.classList.add("ok"));
+    win(w);
+  } else {
+    slots.forEach(s=>s.classList.add("no"));
+    state.tries++;
+    buddy("🤔", state.tries >= 2 ? "Прво слово је “" + spellState.target[0] + "”" : "Скоро! Пробај поново.");
+    setTimeout(()=>{
+      spellState.filled.forEach(f=>f.btn.classList.remove("used"));
+      spellState.filled = [];
+      paintSlots();
+    }, 700);
+  }
+}
+
+/* ---------- бодовање ---------- */
+function win(w){
+  const first = state.tries === 0;
+  state.doneMap[state.idx] = first;
+  if(first){ state.stars++; confetti(); }
+  else state.missed.push(w);
+  $("starCount").textContent = state.stars;
+  buddy(first ? "🥳" : "🙂", first ? "Браво! Тачно!" : "Тачно је “" + w.e + "”");
+  say(w.e);
+  setTimeout(()=>{
+    state.idx++;
+    if(state.idx >= ROUND) showResult();
+    else renderQuestion();
+  }, 1500);
+}
+
+function showResult(){
+  const s = state.stars;
+  $("resScore").textContent = s;
+  $("resTotal").textContent = ROUND;
+  $("resStars").textContent = "⭐".repeat(s) + "☆".repeat(ROUND - s);
+  let msg, emo;
+  if(s === ROUND){ msg = "Савршено! Ти си права звезда! 🌟"; emo = "🏆"; }
+  else if(s >= 7){ msg = "Одлично ти иде! Само напред!"; emo = "🎉"; }
+  else if(s >= 4){ msg = "Добро! Још мало вежбе и биће супер."; emo = "💪"; }
+  else { msg = "Свака вежба се броји. Пробај опет!"; emo = "🌱"; }
+  $("resMsg").textContent = msg; $("resEmoji").textContent = emo;
+
+  const uniq = [];
+  state.missed.forEach(w=>{ if(!uniq.some(x=>x.e===w.e)) uniq.push(w); });
+  const rev = $("review"), list = $("reviewList");
+  list.innerHTML = "";
+  rev.hidden = uniq.length === 0;
+  uniq.forEach(w=>{
+    const li = document.createElement("li");
+    li.innerHTML = '<span style="font-size:1.4rem">'+w.i+'</span><span><b>'+w.e+'</b> — '+w.s+'</span>';
+    li.style.cursor = "pointer";
+    li.onclick = () => say(w.e);
+    list.appendChild(li);
+  });
+  setScreen("result");
+}
+
+/* ---------- речник ---------- */
+function buildDict(){
+  const body = $("dictBody");
+  body.innerHTML = "";
+  let list = WORDS.filter(w => w.l <= state.level);
+  if(state.cat !== "all") list = list.filter(w => w.c === state.cat);
+  Object.keys(CATS).forEach(k=>{
+    const group = list.filter(w => w.c === k);
+    if(!group.length) return;
+    const sec = document.createElement("div");
+    sec.className = "dict-group";
+    sec.innerHTML = "<h3>" + CATS[k] + "</h3>";
+    const grid = document.createElement("div");
+    grid.className = "dict-grid";
+    group.forEach(w=>{
+      const b = document.createElement("button");
+      b.className = "word";
+      b.innerHTML = '<span class="we">'+w.i+'</span><span><b>'+w.e+'</b><small>'+w.s+'</small></span>';
+      b.onclick = () => say(w.e);
+      grid.appendChild(b);
+    });
+    sec.appendChild(grid);
+    body.appendChild(sec);
+  });
+  if(!body.innerHTML) body.innerHTML = "<p style='font-weight:800'>Нема речи за овај избор.</p>";
+}
+
+/* ---------- старт ---------- */
+buildCatSelect();
+</script>
+</body>
+</html>
