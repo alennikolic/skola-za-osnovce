@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сабирање и одузимање до 100 са прелазом десетице</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            color: #2d3748;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 10px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #2b6cb0;
+            font-size: 2em;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 1.05em;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 680px;
+            justify-content: center;
+        }
+
+        .nav-btn {
+            background-color: #e2e8f0;
+            color: #4a5568;
+            font-size: 1.1em;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .nav-btn:hover {
+            background-color: #cbd5e0;
+        }
+
+        .nav-btn.active {
+            background-color: #3182ce;
+            color: white;
+            box-shadow: 0 4px 10px rgba(49, 130, 206, 0.3);
+        }
+
+        .main-card {
+            background-color: #ffffff;
+            border-radius: 20px;
+            padding: 25px 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 680px;
+            text-align: center;
+        }
+
+        /* Sekcije */
+        .tab-section {
+            display: none;
+        }
+
+        .tab-section.active {
+            display: block;
+        }
+
+        /* Stat/Score bar */
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: #edf2f7;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            color: #4a5568;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 1.1em;
+        }
+
+        .question-display {
+            font-size: 3.5em;
+            font-weight: 800;
+            color: #2b6cb0;
+            margin: 15px 0;
+            letter-spacing: 2px;
+        }
+
+        /* Dugmad sa odgovorima */
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .option-btn {
+            background-color: #edf2f7;
+            color: #2d3748;
+            font-size: 2.2em;
+            padding: 18px;
+            border: 3px solid #cbd5e0;
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.15s ease;
+        }
+
+        .option-btn:hover {
+            background-color: #e2e8f0;
+            border-color: #3182ce;
+            transform: translateY(-2px);
+        }
+
+        .option-btn:active {
+            transform: translateY(0);
+        }
+
+        .option-btn.correct {
+            background-color: #48bb78 !important;
+            color: white !important;
+            border-color: #38a169 !important;
+        }
+
+        .option-btn.wrong {
+            background-color: #f56565 !important;
+            color: white !important;
+            border-color: #e53e3e !important;
+        }
+
+        /* Vizuelno Pomagalo Accordion / Box */
+        .visual-box {
+            background: #f7fafc;
+            border: 2px dashed #cbd5e0;
+            border-radius: 16px;
+            padding: 20px 15px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .visual-title {
+            font-weight: 700;
+            color: #4a5568;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toggle-btn {
+            background: #e2e8f0;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        .toggle-btn:hover {
+            background: #cbd5e0;
+        }
+
+        /* Brojevna prava SVG */
+        .number-line-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 10px;
+            padding-bottom: 5px;
+        }
+
+        svg {
+            width: 100%;
+            height: 120px;
+        }
+
+        /* Blokovi desetica i jedinica */
+        .blocks-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            align-items: flex-end;
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        .num-block-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .num-label {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #4a5568;
+        }
+
+        .tens-and-ones {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            padding: 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            background: #faf5ff;
+        }
+
+        .tens-group {
+            display: flex;
+            gap: 4px;
+        }
+
+        .ten-stick {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            background: #3182ce;
+            padding: 3px;
+            border-radius: 4px;
+        }
+
+        .cube-ten {
+            width: 12px;
+            height: 12px;
+            background: #63b3ed;
+            border-radius: 2px;
+        }
+
+        .ones-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 4px;
+            align-content: flex-end;
+        }
+
+        .cube-one {
+            width: 14px;
+            height: 14px;
+            background: #ed8936;
+            border-radius: 3px;
+        }
+
+        .step-explanation {
+            background: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 12px 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 15px;
+            font-size: 1.05em;
+            color: #2c5282;
+            line-height: 1.5;
+        }
+
+        .step-highlight {
+            font-weight: bold;
+            color: #dd6b20;
+        }
+
+        /* Formular u Istraživaču */
+        .explorer-form {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .explorer-input {
+            width: 90px;
+            font-size: 1.8em;
+            text-align: center;
+            padding: 8px;
+            border: 2px solid #cbd5e0;
+            border-radius: 12px;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .explorer-select {
+            font-size: 1.8em;
+            padding: 8px 12px;
+            border: 2px solid #cbd5e0;
+            border-radius: 12px;
+            font-weight: bold;
+            background: white;
+            color: #2b6cb0;
+            cursor: pointer;
+        }
+
+        .action-btn {
+            background-color: #38a169;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .action-btn:hover {
+            background-color: #2f855a;
+        }
+
+        .msg-box {
+            height: 30px;
+            font-size: 1.4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .msg-correct { color: #38a169; }
+        .msg-wrong { color: #e53e3e; }
+
+        @media (max-width: 500px) {
+            .question-display { font-size: 2.8em; }
+            .option-btn { font-size: 1.8em; padding: 12px; }
+            .explorer-input { width: 70px; font-size: 1.4em; }
+            .explorer-select { font-size: 1.4em; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Математика до 100 🧮</h1>
+        <div class="subtitle">Сабирање и одузимање са прелазом преко десетице</div>
+    </header>
+
+    <div class="nav-tabs">
+        <button class="nav-btn active" id="tab-quiz-btn" onclick="switchTab('quiz')">🎮 Квиз Задаци</button>
+        <button class="nav-btn" id="tab-explorer-btn" onclick="switchTab('explorer')">🔍 Визуелни Калкулатор</button>
+    </div>
+
+    <div class="main-card">
+        <!-- СЕКЦИЈА 1: КВИЗ -->
+        <div id="quiz-tab" class="tab-section active">
+            <div class="stats-bar">
+                <div class="stat-item">⭐ Поени: <span id="score-val">0</span></div>
+                <div class="stat-item">🔥 Низ: <span id="streak-val">0</span></div>
+            </div>
+
+            <div class="question-display" id="question-text">28 + 15</div>
+
+            <div class="msg-box" id="feedback-msg"></div>
+
+            <div class="options-grid" id="options-box">
+                <!-- Овде иду дугмад са одговорима -->
+            </div>
+
+            <!-- Визуелно помагало за тренутно питање -->
+            <div class="visual-box">
+                <div class="visual-title">
+                    <span>💡 Визуелно помоћно објашњење</span>
+                    <button class="toggle-btn" onclick="toggleVisuals()" id="toggle-vis-btn">Сакриј помоћ</button>
+                </div>
+                <div id="visual-content">
+                    <div class="step-explanation" id="step-text">
+                        Објашњење корака ће се приказати овде.
+                    </div>
+                    <div class="number-line-container">
+                        <svg id="quiz-svg-line" viewBox="0 0 600 120"></svg>
+                    </div>
+                    <div class="blocks-container" id="quiz-blocks">
+                        <!-- Визуелни кубићи -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- СЕКЦИЈА 2: ВИЗУЕЛНИ ИСТРАЖИВАЧ -->
+        <div id="explorer-tab" class="tab-section">
+            <h2 style="color: #2b6cb0; margin-bottom: 15px;">Истражи прелазак преко десетице</h2>
+            <p style="color: #4a5568; margin-bottom: 20px;">Унеси два броја и изабери операцију да видиш како се раставља и прелази десетица!</p>
+
+            <div class="explorer-form">
+                <input type="number" id="exp-n1" class="explorer-input" value="38" min="1" max="99">
+                <select id="exp-op" class="explorer-select">
+                    <option value="+">+</option>
+                    <option value="-">-</option>
+                </select>
+                <input type="number" id="exp-n2" class="explorer-input" value="25" min="1" max="99">
+                <button class="action-btn" onclick="runExplorer()">Prikaži step-by-step</button>
+            </div>
+
+            <div id="explorer-error" style="color:#e53e3e; font-weight:bold; margin-bottom:10px;"></div>
+
+            <div class="visual-box" id="exp-visual-box">
+                <div class="visual-title">
+                    <span>📊 Корак по корак растављање</span>
+                    <span id="exp-result-title" style="color:#3182ce; font-weight:800; font-size:1.2em;"></span>
+                </div>
+                <div class="step-explanation" id="exp-step-text"></div>
+                <div class="number-line-container">
+                    <svg id="exp-svg-line" viewBox="0 0 600 120"></svg>
+                </div>
+                <div class="blocks-container" id="exp-blocks"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProblem = null;
+        let score = 0;
+        let streak = 0;
+        let isWaiting = false;
+        let showVisuals = true;
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+
+            if (tabName === 'quiz') {
+                document.getElementById('quiz-tab').classList.add('active');
+                document.getElementById('tab-quiz-btn').classList.add('active');
+            } else {
+                document.getElementById('explorer-tab').classList.add('active');
+                document.getElementById('tab-explorer-btn').classList.add('active');
+                runExplorer();
+            }
+        }
+
+        function toggleVisuals() {
+            showVisuals = !showVisuals;
+            const content = document.getElementById('visual-content');
+            const btn = document.getElementById('toggle-vis-btn');
+            if (showVisuals) {
+                content.style.display = 'block';
+                btn.textContent = 'Сакриј помоћ';
+            } else {
+                content.style.display = 'none';
+                btn.textContent = 'Прикажи помоћ';
+            }
+        }
+
+        // Генерисање задатака са прелазом десетице do 100
+        function generateProblem() {
+            const isAddition = Math.random() < 0.5;
+            let n1, n2, result;
+
+            if (isAddition) {
+                // Сабирање са прелазом: zbir <= 100, j1 + j2 >= 10
+                while (true) {
+                    n1 = Math.floor(Math.random() * 70) + 12; // 12 .. 81
+                    n2 = Math.floor(Math.random() * 40) + 9;  // 9 .. 48
+                    
+                    let j1 = n1 % 10;
+                    let j2 = n2 % 10;
+
+                    if (j1 > 0 && j2 > 0 && (j1 + j2 >= 10) && (n1 + n2 <= 100)) {
+                        result = n1 + n2;
+                        break;
+                    }
+                }
+            } else {
+                // Одузимање са прелазом: n1 > n2, j1 < j2, n1 <= 100
+                while (true) {
+                    n1 = Math.floor(Math.random() * 80) + 21; // 21 .. 100
+                    n2 = Math.floor(Math.random() * (n1 - 10)) + 9;
+                    
+                    let j1 = n1 % 10;
+                    let j2 = n2 % 10;
+
+                    if (j1 > 0 && j2 > 0 && j1 < j2 && (n1 - n2 >= 2)) {
+                        result = n1 - n2;
+                        break;
+                    }
+                }
+            }
+
+            return {
+                n1: n1,
+                n2: n2,
+                op: isAddition ? '+' : '-',
+                result: result
+            };
+        }
+
+        function loadNewQuizQuestion() {
+            isWaiting = false;
+            document.getElementById('feedback-msg').textContent = '';
+            document.getElementById('feedback-msg').className = 'msg-box';
+
+            currentProblem = generateProblem();
+            document.getElementById('question-text').textContent = `${currentProblem.n1} ${currentProblem.op} ${currentProblem.n2}`;
+
+            // Понуђени одговори
+            let choices = new Set([currentProblem.result]);
+            while (choices.size < 4) {
+                let offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? 1 : -1);
+                // Честе грешке деце: заборављен прелаз (+/- 10) или суседни број
+                if (Math.random() < 0.4) {
+                    offset = Math.random() < 0.5 ? 10 : -10;
+                }
+                let wrong = currentProblem.result + offset;
+                if (wrong > 0 && wrong <= 100 && wrong !== currentProblem.result) {
+                    choices.add(wrong);
+                }
+            }
+
+            const shuffledChoices = Array.from(choices).sort(() => Math.random() - 0.5);
+            const optionsBox = document.getElementById('options-box');
+            optionsBox.innerHTML = '';
+
+            shuffledChoices.forEach(val => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = val;
+                btn.onclick = () => checkQuizAnswer(val, btn);
+                optionsBox.appendChild(btn);
+            });
+
+            // Нацртај визуелна помагала
+            renderVisuals(currentProblem, 'quiz-svg-line', 'quiz-blocks', 'step-text');
+        }
+
+        function checkQuizAnswer(selectedVal, btnEl) {
+            if (isWaiting) return;
+
+            const msgEl = document.getElementById('feedback-msg');
+            if (selectedVal === currentProblem.result) {
+                btnEl.classList.add('correct');
+                msgEl.textContent = 'Тачно! Браво! 🌟';
+                msgEl.className = 'msg-box msg-correct';
+                score += 10;
+                streak += 1;
+                document.getElementById('score-val').textContent = score;
+                document.getElementById('streak-val').textContent = streak;
+                isWaiting = true;
+                setTimeout(loadNewQuizQuestion, 1400);
+            } else {
+                btnEl.classList.add('wrong');
+                msgEl.textContent = 'Покушај поново! 💡 Погледај слику испод.';
+                msgEl.className = 'msg-box msg-wrong';
+                streak = 0;
+                document.getElementById('streak-val').textContent = streak;
+                setTimeout(() => {
+                    btnEl.classList.remove('wrong');
+                }, 800);
+            }
+        }
+
+        // Рендеровање БРОЈЕВНЕ ПРАВЕ и БЛОКОВА
+        function renderVisuals(prob, svgId, blocksId, textId) {
+            const { n1, n2, op, result } = prob;
+            const textEl = document.getElementById(textId);
+
+            if (op === '+') {
+                let j1 = n1 % 10;
+                let step1_to_ten = 10 - j1; // колико фали до следеће десетице
+                let mid_ten = n1 + step1_to_ten; // следећа пуна десетица
+                let remaining_n2 = n2 - step1_to_ten;
+                let tens_jump = Math.floor(remaining_n2 / 10) * 10;
+                let remaining_ones = remaining_n2 % 10;
+
+                let htmlStep = `Пример: <b>${n1} + ${n2}</b><br>`;
+                htmlStep += `1️⃣ Допунимо <b>${n1}</b> до прве десетице (<b>${mid_ten}</b>): додамо <span class="step-highlight">+${step1_to_ten}</span>.<br>`;
+                if (tens_jump > 0) {
+                    htmlStep += `2️⃣ Додамо десетице (<span class="step-highlight">+${tens_jump}</span>) ➡️ стижемо до <b>${mid_ten + tens_jump}</b>.<br>`;
+                }
+                if (remaining_ones > 0) {
+                    htmlStep += `3️⃣ Додамо преостале јединице (<span class="step-highlight">+${remaining_ones}</span>) ➡️ <b>Коначан резултат = ${result}</b>.`;
+                }
+                textEl.innerHTML = htmlStep;
+
+                // Нацртај СВГ са скалом
+                drawNumberLineSVG(svgId, n1, result, [
+                    { from: n1, to: mid_ten, label: `+${step1_to_ten}` },
+                    ...(tens_jump > 0 ? [{ from: mid_ten, to: mid_ten + tens_jump, label: `+${tens_jump}` }] : []),
+                    ...(remaining_ones > 0 ? [{ from: mid_ten + tens_jump, to: result, label: `+${remaining_ones}` }] : [])
+                ]);
+
+            } else { // Oduzimanje (-)
+                let j1 = n1 % 10;
+                let prev_ten = n1 - j1; // претходна пуна десетица
+                let remaining_n2 = n2 - j1;
+                let tens_jump = Math.floor(remaining_n2 / 10) * 10;
+                let remaining_ones = remaining_n2 % 10;
+
+                let htmlStep = `Пример: <b>${n1} - ${n2}</b><br>`;
+                htmlStep += `1️⃣ Одузмемо <span class="step-highlight">-${j1}</span> да дођемо до округле десетице <b>${prev_ten}</b>.<br>`;
+                if (tens_jump > 0) {
+                    htmlStep += `2️⃣ Одузмемо десетице (<span class="step-highlight">-${tens_jump}</span>) ➡️ стижемо до <b>${prev_ten - tens_jump}</b>.<br>`;
+                }
+                if (remaining_ones > 0) {
+                    htmlStep += `3️⃣ Одузмемо преостале јединице (<span class="step-highlight">-${remaining_ones}</span>) ➡️ <b>Коначан резултат = ${result}</b>.`;
+                }
+                textEl.innerHTML = htmlStep;
+
+                drawNumberLineSVG(svgId, result, n1, [
+                    { from: n1, to: prev_ten, label: `-${j1}` },
+                    ...(tens_jump > 0 ? [{ from: prev_ten, to: prev_ten - tens_jump, label: `-${tens_jump}` }] : []),
+                    ...(remaining_ones > 0 ? [{ from: prev_ten - tens_jump, to: result, label: `-${remaining_ones}` }] : [])
+                ]);
+            }
+
+            // Рендеровање Блокова
+            renderBlocksHTML(blocksId, n1, n2, op, result);
+        }
+
+        function drawNumberLineSVG(svgId, minVal, maxVal, jumps) {
+            const svg = document.getElementById(svgId);
+            svg.innerHTML = '';
+
+            let startX = 50;
+            let endX = 550;
+            let rangeMin = Math.max(0, Math.min(minVal, maxVal) - 5);
+            let rangeMax = Math.min(100, Math.max(minVal, maxVal) + 5);
+            let totalSpan = rangeMax - rangeMin;
+
+            function getX(val) {
+                return startX + ((val - rangeMin) / totalSpan) * (endX - startX);
+            }
+
+            // Главна линија
+            let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", "20");
+            line.setAttribute("y1", "80");
+            line.setAttribute("x2", "580");
+            line.setAttribute("y2", "80");
+            line.setAttribute("stroke", "#a0aec0");
+            line.setAttribute("stroke-width", "4");
+            line.setAttribute("stroke-linecap", "round");
+            svg.appendChild(line);
+
+            // Подеоци (Brojevi na liniji)
+            let step = totalSpan > 30 ? 10 : 5;
+            let firstTick = Math.ceil(rangeMin / step) * step;
+            for (let v = firstTick; v <= rangeMax; v += step) {
+                let x = getX(v);
+                let tick = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                tick.setAttribute("x1", x);
+                tick.setAttribute("y1", "75");
+                tick.setAttribute("x2", x);
+                tick.setAttribute("y2", "85");
+                tick.setAttribute("stroke", "#718096");
+                tick.setAttribute("stroke-width", "2");
+                svg.appendChild(tick);
+
+                let txt = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                txt.setAttribute("x", x);
+                txt.setAttribute("y", "105");
+                txt.setAttribute("font-size", "13");
+                txt.setAttribute("font-weight", "bold");
+                txt.setAttribute("fill", "#4a5568");
+                txt.setAttribute("text-anchor", "middle");
+                txt.textContent = v;
+                svg.appendChild(txt);
+            }
+
+            // Цртање Лукова (Jumps)
+            jumps.forEach(j => {
+                let x1 = getX(j.from);
+                let x2 = getX(j.to);
+                let midX = (x1 + x2) / 2;
+                let radius = Math.abs(x2 - x1) / 2;
+                let arcY = 75 - Math.min(radius, 45);
+
+                let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                let d = `M ${x1} 75 Q ${midX} ${arcY - 15} ${x2} 75`;
+                path.setAttribute("d", d);
+                path.setAttribute("fill", "none");
+                path.setAttribute("stroke", "#e53e3e");
+                path.setAttribute("stroke-width", "3");
+                path.setAttribute("stroke-dasharray", "4,4");
+                svg.appendChild(path);
+
+                // Стрелица
+                let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", x2);
+                circle.setAttribute("cy", 75);
+                circle.setAttribute("r", "5");
+                circle.setAttribute("fill", "#e53e3e");
+                svg.appendChild(circle);
+
+                // Лабела скакања
+                let label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                label.setAttribute("x", midX);
+                label.setAttribute("y", arcY - 8);
+                label.setAttribute("font-size", "14");
+                label.setAttribute("font-weight", "800");
+                label.setAttribute("fill", "#dd6b20");
+                label.setAttribute("text-anchor", "middle");
+                label.textContent = j.label;
+                svg.appendChild(label);
+            });
+        }
+
+        // Блокови за 10 и 1
+        function renderBlocksHTML(containerId, n1, n2, op, result) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            function createBlockGroup(num, title) {
+                let tens = Math.floor(num / 10);
+                let ones = num % 10;
+
+                let group = document.createElement('div');
+                group.className = 'num-block-group';
+                group.innerHTML = `<div class="num-label">${title} = ${num}</div>`;
+
+                let tensAndOnes = document.createElement('div');
+                tensAndOnes.className = 'tens-and-ones';
+
+                // Десетице (плаве палице)
+                let tensGrp = document.createElement('div');
+                tensGrp.className = 'tens-group';
+                for (let i = 0; i < tens; i++) {
+                    let stick = document.createElement('div');
+                    stick.className = 'ten-stick';
+                    for (let c = 0; c < 10; c++) {
+                        let cube = document.createElement('div');
+                        cube.className = 'cube-ten';
+                        stick.appendChild(cube);
+                    }
+                    tensGrp.appendChild(stick);
+                }
+
+                // Јединице (наранџасти коцкице)
+                let onesGrp = document.createElement('div');
+                onesGrp.className = 'ones-group';
+                for (let i = 0; i < ones; i++) {
+                    let cube = document.createElement('div');
+                    cube.className = 'cube-one';
+                    onesGrp.appendChild(cube);
+                }
+
+                tensAndOnes.appendChild(tensGrp);
+                tensAndOnes.appendChild(onesGrp);
+                group.appendChild(tensAndOnes);
+                return group;
+            }
+
+            container.appendChild(createBlockGroup(n1, 'Први број'));
+
+            let sign = document.createElement('div');
+            sign.style.fontSize = '2.5em';
+            sign.style.fontWeight = 'bold';
+            sign.style.color = '#3182ce';
+            sign.textContent = op;
+            container.appendChild(sign);
+
+            container.appendChild(createBlockGroup(n2, 'Други број'));
+
+            let eq = document.createElement('div');
+            eq.style.fontSize = '2.5em';
+            eq.style.fontWeight = 'bold';
+            eq.style.color = '#38a169';
+            eq.textContent = '=';
+            container.appendChild(eq);
+
+            container.appendChild(createBlockGroup(result, 'Резултат'));
+        }
+
+        // ИСТРАЖИВАЧ
+        function runExplorer() {
+            let n1 = parseInt(document.getElementById('exp-n1').value) || 0;
+            let n2 = parseInt(document.getElementById('exp-n2').value) || 0;
+            let op = document.getElementById('exp-op').value;
+            let errEl = document.getElementById('explorer-error');
+
+            errEl.textContent = '';
+
+            if (n1 < 1 || n1 > 99 || n2 < 1 || n2 > 99) {
+                errEl.textContent = 'Унесите бројеве између 1 и 99!';
+                return;
+            }
+
+            let res = op === '+' ? n1 + n2 : n1 - n2;
+
+            if (res < 0 || res > 100) {
+                errEl.textContent = 'Резултат мора бити између 0 и 100!';
+                return;
+            }
+
+            document.getElementById('exp-result-title').textContent = `${n1} ${op} ${n2} = ${res}`;
+
+            renderVisuals({ n1: n1, n2: n2, op: op, result: res }, 'exp-svg-line', 'exp-blocks', 'exp-step-text');
+        }
+
+        // Покретање
+        window.onload = () => {
+            loadNewQuizQuestion();
+        };
+    </script>
+</body>
+</html>
