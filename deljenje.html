@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таблица дељења</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8efba;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .nav-btn {
+            background-color: #c8d6e5;
+            color: #2f3640;
+            font-size: 1.2em;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .nav-btn.active {
+            background-color: #fdcb6e;
+            color: #2d3436;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        h1 {
+            color: #e17055;
+            margin-bottom: 20px;
+            font-size: 2.2em;
+        }
+        
+        /* Секција за вежбање */
+        #vezba-sekcija {
+            display: block;
+        }
+        .question {
+            font-size: 4em;
+            font-weight: bold;
+            color: #00cec9;
+            margin-bottom: 30px;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .option-btn {
+            background-color: #74b9ff;
+            color: white;
+            font-size: 2em;
+            padding: 20px;
+            border: 4px solid transparent;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.3s;
+            font-weight: bold;
+        }
+        .option-btn:hover {
+            background-color: #0984e3;
+        }
+        .option-btn:active {
+            transform: scale(0.95);
+        }
+        .option-btn.correct-anim {
+            background-color: #00b894;
+            color: white;
+        }
+        .option-btn.wrong-anim {
+            background-color: #d63031;
+            color: white;
+        }
+        .message {
+            margin-top: 10px;
+            font-size: 1.5em;
+            font-weight: bold;
+            height: 35px;
+        }
+        .correct { color: #00b894; }
+        .incorrect { color: #d63031; }
+        .score {
+            margin-top: 20px;
+            font-size: 1.5em;
+            color: #636e72;
+            font-weight: bold;
+        }
+
+        /* Секција за преглед таблице */
+        #pregled-sekcija {
+            display: none;
+        }
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            text-align: left;
+        }
+        .table-card {
+            background-color: #fdfcdc;
+            border: 2px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        .table-card h3 {
+            margin: 0 0 10px 0;
+            color: #d63031;
+            text-align: center;
+            border-bottom: 2px solid #ffeaa7;
+            padding-bottom: 5px;
+        }
+        .table-card p {
+            margin: 4px 0;
+            font-size: 1.1em;
+            color: #2d3436;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-tabs">
+        <button class="nav-btn active" id="btn-vezba" onclick="switchTab('vezba')">🎮 Вежбај</button>
+        <button class="nav-btn" id="btn-pregled" onclick="switchTab('pregled')">📚 Преглед таблице</button>
+    </div>
+
+    <div class="container">
+        
+        <!-- Секција за вежбање -->
+        <div id="vezba-sekcija">
+            <h1>Погоди резултат!</h1>
+            <div class="question" id="question">? : ?</div>
+            
+            <div class="options-grid" id="options-container">
+                <!-- Дугмићи се генеришу кроз JS -->
+            </div>
+
+            <div class="message" id="message"></div>
+            <div class="score">Резултат: <span id="score">0</span></div>
+        </div>
+
+        <!-- Секција за преглед -->
+        <div id="pregled-sekcija">
+            <h1>Таблица дељења</h1>
+            <div class="table-grid" id="table-container">
+                <!-- Табеле се генеришу кроз JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let correctAnswer;
+        let score = 0;
+        let isWaiting = false;
+
+        // Функција за промену табова
+        function switchTab(tab) {
+            if (tab === 'vezba') {
+                document.getElementById('vezba-sekcija').style.display = 'block';
+                document.getElementById('pregled-sekcija').style.display = 'none';
+                document.getElementById('btn-vezba').classList.add('active');
+                document.getElementById('btn-pregled').classList.remove('active');
+            } else {
+                document.getElementById('vezba-sekcija').style.display = 'none';
+                document.getElementById('pregled-sekcija').style.display = 'block';
+                document.getElementById('btn-pregled').classList.add('active');
+                document.getElementById('btn-vezba').classList.remove('active');
+            }
+        }
+
+        // Генерисање прегледа целе таблице
+        function generateTableOverview() {
+            const container = document.getElementById('table-container');
+            let html = '';
+            for (let i = 1; i <= 10; i++) {
+                html += `<div class="table-card"><h3>Са бројем ${i}</h3>`;
+                for (let j = 1; j <= 10; j++) {
+                    let dividend = i * j;
+                    html += `<p>${dividend} : ${i} = <b>${j}</b></p>`;
+                }
+                html += `</div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        // Генерисање питања и понуђених одговора
+        function generateQuestion() {
+            isWaiting = false;
+            document.getElementById('message').textContent = '';
+            
+            // За дељење осигуравамо да је резултат увек цео број између 1 и 10
+            const divisor = Math.floor(Math.random() * 10) + 1; // Број са којим делимо
+            correctAnswer = Math.floor(Math.random() * 10) + 1; // Резултат (количник)
+            const dividend = divisor * correctAnswer; // Број који се дели
+            
+            // У школама у Србији се за дељење најчешће користи двотачка (:)
+            document.getElementById('question').textContent = `${dividend} : ${divisor}`;
+            
+            // Генерисање лажних одговора (резултат дељења је увек између 1 и 10)
+            let options = new Set([correctAnswer]);
+            while (options.size < 4) {
+                let wrong = Math.floor(Math.random() * 10) + 1;
+                
+                // Правимо мале варијације, нпр. суседни бројеви
+                let r = Math.random();
+                if (r < 0.3) wrong = correctAnswer + 1;
+                else if (r < 0.6) wrong = Math.max(1, correctAnswer - 1);
+                
+                if (wrong > 0 && wrong <= 10 && wrong !== correctAnswer) {
+                    options.add(wrong);
+                }
+            }
+
+            // Мешање одговора
+            const shuffledOptions = Array.from(options).sort(() => Math.random() - 0.5);
+            
+            // Искрцавање дугмића
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+            
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => checkAnswer(opt, btn);
+                optionsContainer.appendChild(btn);
+            });
+        }
+
+        function checkAnswer(selectedAnswer, btnElement) {
+            if (isWaiting) return; // Спречава кликтање док се учитава следеће питање
+            
+            const messageEl = document.getElementById('message');
+            
+            if (selectedAnswer === correctAnswer) {
+                btnElement.classList.add('correct-anim');
+                messageEl.textContent = 'Тачно! 🎯';
+                messageEl.className = 'message correct';
+                score += 1;
+                document.getElementById('score').textContent = score;
+                isWaiting = true;
+                setTimeout(generateQuestion, 1200);
+            } else {
+                btnElement.classList.add('wrong-anim');
+                messageEl.textContent = 'Пробај опет! 💡';
+                messageEl.className = 'message incorrect';
+                
+                // Скида црвену боју после пола секунде
+                setTimeout(() => {
+                    btnElement.classList.remove('wrong-anim');
+                    messageEl.textContent = '';
+                }, 800);
+            }
+        }
+
+        // Иницијализација при учитавању
+        window.onload = () => {
+            generateTableOverview();
+            generateQuestion();
+        };
+    </script>
+</body>
+</html>
