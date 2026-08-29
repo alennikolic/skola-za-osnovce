@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Рачунање до 1000</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@600;700;800&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2A4A;
+    --paper:#F2FBF6;
+    --dot:#C9E6D6;
+    --sun:#FFC93C;
+    --coral:#FF6B5B;
+    --mint:#2ED9A0;
+    --grape:#8C6BEA;
+    --sky:#4CC3F0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Nunito','Segoe UI',Arial,sans-serif;
+    color:var(--ink);
+    background-color:var(--paper);
+    background-image:radial-gradient(var(--dot) 1.6px, transparent 1.7px);
+    background-size:24px 24px;
+    min-height:100vh;padding:18px 14px 60px;
+  }
+  body, body *{font-style:normal !important}
+  h1,h2,h3{font-family:'Rubik','Nunito',Arial,sans-serif}
+  .wrap{max-width:820px;margin:0 auto}
+
+  .topbar{
+    display:flex;align-items:center;gap:14px;background:#fff;
+    border:3px solid var(--ink);border-radius:22px;box-shadow:0 6px 0 var(--ink);
+    padding:14px 18px;margin-bottom:18px;
+  }
+  .mascot{font-size:2.6rem;line-height:1;flex:none}
+  .topbar h1{font-size:1.35rem;margin:0}
+  .topbar p{margin:2px 0 0;font-size:.9rem;font-weight:700;opacity:.65}
+
+  .panel{
+    background:#fff;border:3px solid var(--ink);border-radius:22px;
+    box-shadow:0 6px 0 var(--ink);padding:18px;margin-bottom:18px;
+  }
+  .row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:12px}
+  .row:last-child{margin-bottom:0}
+  .row-label{font-weight:900;font-size:.95rem;min-width:110px}
+  .chip{
+    font-family:inherit;font-weight:900;font-size:.95rem;background:#fff;color:var(--ink);
+    border:3px solid var(--ink);border-radius:999px;padding:8px 16px;cursor:pointer;
+    box-shadow:0 3px 0 var(--ink);transition:transform .08s, background .2s;
+  }
+  .chip:hover{background:#EFFAF4}
+  .chip:active{transform:translateY(3px);box-shadow:0 0 0 var(--ink)}
+  .chip[aria-pressed="true"]{background:var(--mint)}
+
+  .modes{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .mode{
+    text-align:left;font-family:inherit;cursor:pointer;color:var(--ink);
+    border:3px solid var(--ink);border-radius:22px;box-shadow:0 6px 0 var(--ink);
+    padding:18px;transition:transform .08s;
+  }
+  .mode:active{transform:translateY(5px);box-shadow:0 1px 0 var(--ink)}
+  .mode .ic{font-size:2.2rem;display:block;margin-bottom:6px}
+  .mode b{font-family:'Rubik',Arial,sans-serif;font-size:1.1rem;display:block}
+  .mode .sub{font-size:.85rem;font-weight:700;opacity:.75}
+  .m1{background:var(--sun)} .m2{background:var(--sky)}
+  .m3{background:var(--grape);color:#fff} .m4{background:var(--coral);color:#fff}
+  .m5{background:#fff;grid-column:1 / -1}
+
+  .gamebar{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .dots{display:flex;gap:6px;flex:1;flex-wrap:wrap}
+  .dot{width:14px;height:14px;border-radius:50%;border:2.5px solid var(--ink);background:#fff}
+  .dot.done{background:var(--mint)} .dot.miss{background:var(--coral)}
+  .dot.now{background:var(--sun);transform:scale(1.25)}
+
+  .stage{text-align:center;padding:22px 18px}
+  .ask{font-size:1rem;font-weight:800;opacity:.7;margin-bottom:12px}
+  .task{
+    font-family:'Rubik',Arial,sans-serif;font-size:3.4rem;font-weight:700;
+    letter-spacing:2px;margin:6px 0 18px;color:var(--ink);
+  }
+  .task .blank{color:var(--grape);border-bottom:6px solid var(--grape);padding:0 14px}
+  .story{
+    font-size:1.25rem;font-weight:800;line-height:1.5;margin:6px auto 18px;
+    max-width:460px;background:var(--paper);border:3px solid var(--ink);
+    border-radius:18px;padding:16px;text-align:left;
+  }
+
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .opt{
+    font-family:'Rubik',Arial,sans-serif;font-weight:700;font-size:1.9rem;
+    background:#fff;color:var(--ink);border:3px solid var(--ink);border-radius:18px;
+    box-shadow:0 5px 0 var(--ink);padding:18px 10px;cursor:pointer;transition:transform .08s,background .2s;
+  }
+  .opt:hover{background:#EFFAF4}
+  .opt:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+  .opt.good{background:var(--mint);color:#fff}
+  .opt.bad{background:var(--coral);color:#fff;animation:shake .35s}
+  .opt.off{opacity:.35;cursor:default}
+  @keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+  .answer-box{
+    font-family:'Rubik',Arial,sans-serif;font-size:2.6rem;font-weight:700;
+    min-height:74px;border:3px solid var(--ink);border-radius:18px;background:#fff;
+    display:flex;align-items:center;justify-content:center;margin:0 auto 16px;
+    max-width:260px;letter-spacing:3px;
+  }
+  .answer-box.good{background:var(--mint);color:#fff}
+  .answer-box.bad{background:var(--coral);color:#fff;animation:shake .35s}
+  .answer-box .caret{color:var(--grape);opacity:.5}
+  .pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:320px;margin:0 auto}
+  .key{
+    font-family:'Rubik',Arial,sans-serif;font-size:1.7rem;font-weight:700;
+    background:#fff;border:3px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink);
+    padding:14px 0;cursor:pointer;color:var(--ink);
+  }
+  .key:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
+  .key.del{background:var(--sun)}
+  .key.ok{background:var(--mint);color:#fff}
+
+  .helper{margin-top:16px}
+  .hint-btn{
+    font-family:inherit;font-weight:900;background:var(--paper);border:3px solid var(--ink);
+    border-radius:999px;padding:8px 18px;cursor:pointer;box-shadow:0 3px 0 var(--ink);color:var(--ink);
+  }
+  .hint-text{
+    margin-top:12px;background:var(--paper);border:3px dashed var(--ink);border-radius:16px;
+    padding:12px;font-weight:800;font-size:1.05rem;line-height:1.6;
+  }
+  .hint-text b{font-family:'Rubik',Arial,sans-serif}
+
+  .buddy{display:flex;align-items:center;justify-content:center;gap:10px;min-height:56px;margin-top:16px}
+  .buddy .face{font-size:2.4rem}
+  .bubble{background:var(--paper);border:3px solid var(--ink);border-radius:16px;padding:8px 14px;font-weight:900;font-size:1.05rem}
+
+  .result{text-align:center;padding:26px 18px}
+  .score-big{font-family:'Rubik',Arial,sans-serif;font-size:3.4rem;font-weight:700;margin:8px 0}
+  .stars{font-size:1.8rem;letter-spacing:4px;margin-bottom:10px}
+  .review{text-align:left;margin:18px auto 0;max-width:420px}
+  .review h3{font-size:1rem;margin:0 0 8px}
+  .review ul{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+  .review li{
+    background:var(--paper);border:2.5px solid var(--ink);border-radius:14px;padding:10px 12px;
+    font-weight:800;font-family:'Rubik',Arial,sans-serif;
+  }
+
+  .tips h3{font-size:1.1rem;margin:0 0 8px;padding-bottom:6px;border-bottom:3px solid var(--dot)}
+  .tip{margin-bottom:22px}
+  .tip p{font-weight:800;line-height:1.6;margin:6px 0}
+  .calc{
+    font-family:'Rubik',Arial,sans-serif;font-size:1.3rem;background:var(--paper);
+    border:2.5px solid var(--ink);border-radius:14px;padding:12px 16px;display:inline-block;line-height:1.7;
+  }
+  .calc .step{color:var(--grape)}
+
+  [hidden]{display:none !important}
+  button:focus-visible{outline:4px dashed var(--grape);outline-offset:3px}
+  .confetti{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+  .conf{position:absolute;font-size:1.5rem;animation:fall 1.2s ease-in forwards}
+  @keyframes fall{0%{transform:translateY(0) rotate(0);opacity:1}100%{transform:translateY(60vh) rotate(320deg);opacity:0}}
+
+  @media (max-width:480px){
+    .modes{grid-template-columns:1fr}
+    .task{font-size:2.5rem}
+    .row-label{min-width:100%}
+    .story{font-size:1.1rem}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="mascot">🦊</span>
+    <div>
+      <h1>Рачунање до 1000</h1>
+      <p>Сабирање и одузимање кроз игру</p>
+    </div>
+  </div>
+
+  <!-- ================= ПОЧЕТНА ================= -->
+  <section id="screen-home">
+    <div class="panel">
+      <div class="row">
+        <span class="row-label">Бројеви до:</span>
+        <button class="chip" data-range="20" aria-pressed="false">20</button>
+        <button class="chip" data-range="100" aria-pressed="true">100</button>
+        <button class="chip" data-range="1000" aria-pressed="false">1000</button>
+      </div>
+      <div class="row">
+        <span class="row-label">Рачунамо:</span>
+        <button class="chip" data-op="+" aria-pressed="false">Сабирање +</button>
+        <button class="chip" data-op="-" aria-pressed="false">Одузимање −</button>
+        <button class="chip" data-op="mix" aria-pressed="true">Помешано ±</button>
+      </div>
+      <div class="row">
+        <span class="row-label">Тежина:</span>
+        <button class="chip" id="btnCarry" aria-pressed="true">Са прелазом преко десетице</button>
+      </div>
+    </div>
+
+    <div class="modes">
+      <button class="mode m1" data-mode="choice">
+        <span class="ic">🎯</span>
+        <b>Погоди резултат</b>
+        <span class="sub">Бираш између четири понуђена броја</span>
+      </button>
+      <button class="mode m2" data-mode="type">
+        <span class="ic">⌨️</span>
+        <b>Укуцај резултат</b>
+        <span class="sub">Рачунаш сам и куцаш одговор</span>
+      </button>
+      <button class="mode m3" data-mode="missing">
+        <span class="ic">🧩</span>
+        <b>Који број недостаје</b>
+        <span class="sub">36 + ___ = 91</span>
+      </button>
+      <button class="mode m4" data-mode="word">
+        <span class="ic">📖</span>
+        <b>Задаци са речима</b>
+        <span class="sub">Прочитај причу и израчунај</span>
+      </button>
+      <button class="mode m5" data-mode="tips">
+        <span class="ic">💡</span>
+        <b>Како се рачуна</b>
+        <span class="sub">Кораци за рачунање до 1000, са примерима</span>
+      </button>
+    </div>
+    <p style="text-align:center;font-size:.85rem;font-weight:700;opacity:.6;margin-top:8px">
+      Свака игра има 10 задатака. Звездица се добија за тачан одговор из првог покушаја.
+    </p>
+  </section>
+
+  <!-- ================= ИГРА ================= -->
+  <section id="screen-game" hidden>
+    <div class="gamebar">
+      <button class="chip" id="btnBack">◂ Назад</button>
+      <div class="dots" id="dots"></div>
+      <span class="chip" style="cursor:default;box-shadow:none">⭐ <b id="starCount">0</b></span>
+    </div>
+
+    <div class="panel stage">
+      <div class="ask" id="ask"></div>
+      <div id="promptArea"></div>
+
+      <div class="options" id="options" hidden></div>
+
+      <div id="padArea" hidden>
+        <div class="answer-box" id="answerBox"><span class="caret">?</span></div>
+        <div class="pad" id="pad"></div>
+      </div>
+
+      <div class="helper">
+        <button class="hint-btn" id="btnHint">💡 Помоћ</button>
+        <div class="hint-text" id="hintText" hidden></div>
+      </div>
+
+      <div class="buddy">
+        <span class="face" id="foxFace">🦊</span>
+        <span class="bubble" id="bubble">Полако и сигурно!</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= РЕЗУЛТАТ ================= -->
+  <section id="screen-result" hidden>
+    <div class="panel result">
+      <div id="resEmoji" style="font-size:4rem">🏆</div>
+      <div class="score-big"><span id="resScore">0</span> / 10</div>
+      <div class="stars" id="resStars"></div>
+      <p style="font-weight:900;font-size:1.2rem" id="resMsg"></p>
+      <div class="review" id="review" hidden>
+        <h3>Задаци за поновно вежбање:</h3>
+        <ul id="reviewList"></ul>
+      </div>
+      <div class="row" style="justify-content:center;margin-top:20px">
+        <button class="chip" id="btnAgain" style="background:var(--mint)">🔁 Играј поново</button>
+        <button class="chip" id="btnHome">🏠 Почетна</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= САВЕТИ ================= -->
+  <section id="screen-tips" hidden>
+    <div class="gamebar"><button class="chip" id="btnBack2">◂ Назад</button></div>
+    <div class="panel tips" id="tipsBody"></div>
+  </section>
+
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const rnd = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
+const shuffle = a => a.slice().sort(()=>Math.random()-0.5);
+const ROUND = 10;
+
+const state = { range:100, op:"mix", carry:true, mode:null, queue:[], idx:0, stars:0, tries:0, missed:[], doneMap:{}, typed:"" };
+
+/* ================= ГЕНЕРИСАЊЕ ЗАДАТАКА ================= */
+function digits(n,len){ return String(n).padStart(len,"0").split("").map(Number); }
+
+function noCarryAdd(a,b){
+  const d = Math.max(String(a).length, String(b).length);
+  const da = digits(a,d), db = digits(b,d);
+  return da.every((x,i)=> x + db[i] < 10);
+}
+function noBorrowSub(a,b){
+  const d = String(a).length;
+  const da = digits(a,d), db = digits(b,d);
+  return da.every((x,i)=> x >= db[i]);
+}
+
+function makeTask(){
+  const max = state.range;
+  const minOp = max <= 20 ? 2 : (max <= 100 ? 11 : 101);
+  const op = state.op === "mix" ? (Math.random() < 0.5 ? "+" : "-") : state.op;
+  let a, b, tries = 0;
+
+  while(true){
+    tries++;
+    if(op === "+"){
+      a = rnd(minOp, max - minOp);
+      b = rnd(minOp, max - a);
+    } else {
+      a = rnd(minOp * 2, max);
+      b = rnd(minOp, a - minOp);
+    }
+    if(b < 1) continue;
+    const clean = op === "+" ? noCarryAdd(a,b) : noBorrowSub(a,b);
+    if(state.carry){
+      // са прелазом: тражимо да прелаз заиста постоји, али не заглављујемо се
+      if(!clean || tries > 40) break;
+    } else {
+      if(clean) break;
+      if(tries > 200) break;
+    }
+  }
+  const ans = op === "+" ? a + b : a - b;
+  return { a, b, op, ans };
+}
+
+/* ================= ЗАДАЦИ СА РЕЧИМА ================= */
+const NAMES = [
+  {n:"Марко",g:"m"},{n:"Вук",g:"m"},{n:"Лука",g:"m"},{n:"Урош",g:"m"},
+  {n:"Ђорђе",g:"m"},{n:"Петар",g:"m"},{n:"Мила",g:"f"},{n:"Лена",g:"f"},
+  {n:"Ана",g:"f"},{n:"Софија",g:"f"},{n:"Тара",g:"f"},{n:"Нина",g:"f"}
+];
+const ITEMS = [
+  {one:"сличицу", few:"сличице", many:"сличица"},
+  {one:"бомбону", few:"бомбоне", many:"бомбона"},
+  {one:"кликер",  few:"кликера", many:"кликера"},
+  {one:"налепницу",few:"налепнице",many:"налепница"},
+  {one:"поен",    few:"поена",   many:"поена"},
+  {one:"новчић",  few:"новчића", many:"новчића"},
+  {one:"динар",   few:"динара",  many:"динара"},
+  {one:"страну",  few:"стране",  many:"страна"}
+];
+function form(n, item){
+  const last = n % 10, last2 = n % 100;
+  if(last === 1 && last2 !== 11) return item.one;
+  if(last >= 2 && last <= 4 && (last2 < 12 || last2 > 14)) return item.few;
+  return item.many;
+}
+function verb(g, m, f){ return g === "m" ? m : f; }
+
+function makeStory(t){
+  const p = NAMES[rnd(0,NAMES.length-1)];
+  const it = ITEMS[rnd(0,ITEMS.length-1)];
+  const A = t.a + " " + form(t.a, it), B = t.b + " " + form(t.b, it);
+  if(t.op === "+"){
+    const tpl = [
+      p.n + " има " + A + ". " + verb(p.g,"Добио","Добила") + " је још " + B + ". Колико сада има укупно?",
+      p.n + " је " + verb(p.g,"сакупио","сакупила") + " " + A + ", а онда још " + B + ". Колико их је сакупио" + verb(p.g,"","ла") + " укупно?",
+      "У понедељак " + p.n + " има " + A + ". У уторак " + verb(p.g,"добија","добија") + " још " + B + ". Колико их има у уторак увече?"
+    ];
+    return tpl[rnd(0,tpl.length-1)];
+  } else {
+    const tpl = [
+      p.n + " је " + verb(p.g,"имао","имала") + " " + A + ". " + verb(p.g,"Поклонио","Поклонила") + " је " + B + ". Колико " + verb(p.g,"му","јој") + " је остало?",
+      p.n + " је " + verb(p.g,"имао","имала") + " " + A + ". " + verb(p.g,"Потрошио","Потрошила") + " је " + B + ". Колико " + verb(p.g,"му","јој") + " је остало?",
+      "У кутији је било " + t.a + " " + form(t.a,it) + ". " + p.n + " је " + verb(p.g,"узео","узела") + " " + B + ". Колико их је остало у кутији?"
+    ];
+    return tpl[rnd(0,tpl.length-1)];
+  }
+}
+
+/* ================= ПОМОЋ ЗА ЗАДАТАК ================= */
+function hintFor(t){
+  const tens = Math.floor(t.b / 10) * 10, ones = t.b % 10;
+  const hun = Math.floor(t.b / 100) * 100;
+  if(t.op === "+"){
+    if(t.b >= 100){
+      const t2 = Math.floor((t.b % 100) / 10) * 10;
+      return "Разложи други број: <b>" + t.b + " = " + hun + " + " + t2 + " + " + ones + "</b><br>" +
+             t.a + " + " + hun + " = <b>" + (t.a+hun) + "</b><br>" +
+             (t.a+hun) + " + " + t2 + " = <b>" + (t.a+hun+t2) + "</b><br>" +
+             (t.a+hun+t2) + " + " + ones + " = <b>" + t.ans + "</b>";
+    }
+    return "Прво додај десетице, па јединице:<br>" +
+           "<b>" + t.b + " = " + tens + " + " + ones + "</b><br>" +
+           t.a + " + " + tens + " = <b>" + (t.a+tens) + "</b><br>" +
+           (t.a+tens) + " + " + ones + " = <b>" + t.ans + "</b>";
+  } else {
+    if(t.b >= 100){
+      const t2 = Math.floor((t.b % 100) / 10) * 10;
+      return "Разложи број који одузимаш: <b>" + t.b + " = " + hun + " + " + t2 + " + " + ones + "</b><br>" +
+             t.a + " − " + hun + " = <b>" + (t.a-hun) + "</b><br>" +
+             (t.a-hun) + " − " + t2 + " = <b>" + (t.a-hun-t2) + "</b><br>" +
+             (t.a-hun-t2) + " − " + ones + " = <b>" + t.ans + "</b>";
+    }
+    return "Прво одузми десетице, па јединице:<br>" +
+           "<b>" + t.b + " = " + tens + " + " + ones + "</b><br>" +
+           t.a + " − " + tens + " = <b>" + (t.a-tens) + "</b><br>" +
+           (t.a-tens) + " − " + ones + " = <b>" + t.ans + "</b>";
+  }
+}
+function hintMissing(t){
+  // тражи се сабирак или умањилац
+  if(t.op === "+"){
+    return "Кад тражиш сабирак, одузимај:<br><b>" + t.ans + " − " + t.a + " = ?</b><br>" +
+           "Провера: " + t.a + " + твој број мора бити " + t.ans + ".";
+  }
+  return "Кад тражиш умањилац, одузимај:<br><b>" + t.a + " − " + t.ans + " = ?</b><br>" +
+         "Провера: " + t.a + " − твој број мора бити " + t.ans + ".";
+}
+
+/* ================= ЕКРАНИ ================= */
+function setScreen(name){
+  ["home","game","result","tips"].forEach(s => $("screen-"+s).hidden = (s !== name));
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function buddy(face, text){ $("foxFace").textContent = face; $("bubble").textContent = text; }
+function confetti(){
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const box = document.createElement("div"); box.className = "confetti";
+  const pieces = ["⭐","🎉","✨","🌟","🎈"];
+  for(let i=0;i<14;i++){
+    const s = document.createElement("span");
+    s.className = "conf"; s.textContent = pieces[rnd(0,pieces.length-1)];
+    s.style.left = Math.random()*100 + "%";
+    s.style.top = (10 + Math.random()*25) + "%";
+    s.style.animationDelay = (Math.random()*0.3) + "s";
+    box.appendChild(s);
+  }
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(), 1800);
+}
+
+/* ================= ПОДЕШАВАЊА ================= */
+document.querySelectorAll("[data-range]").forEach(b=>{
+  b.onclick = () => {
+    state.range = +b.dataset.range;
+    document.querySelectorAll("[data-range]").forEach(x=>x.setAttribute("aria-pressed", x===b));
+  };
+});
+document.querySelectorAll("[data-op]").forEach(b=>{
+  b.onclick = () => {
+    state.op = b.dataset.op;
+    document.querySelectorAll("[data-op]").forEach(x=>x.setAttribute("aria-pressed", x===b));
+  };
+});
+$("btnCarry").onclick = () => {
+  state.carry = !state.carry;
+  $("btnCarry").setAttribute("aria-pressed", state.carry);
+  $("btnCarry").textContent = state.carry ? "Са прелазом преко десетице" : "Без прелаза (лакше)";
+};
+document.querySelectorAll("[data-mode]").forEach(b=>{
+  b.onclick = () => {
+    const m = b.dataset.mode;
+    if(m === "tips"){ buildTips(); setScreen("tips"); return; }
+    startGame(m);
+  };
+});
+$("btnBack").onclick = () => setScreen("home");
+$("btnBack2").onclick = () => setScreen("home");
+$("btnHome").onclick = () => setScreen("home");
+$("btnAgain").onclick = () => startGame(state.mode);
+$("btnHint").onclick = () => {
+  const t = state.queue[state.idx];
+  const box = $("hintText");
+  box.innerHTML = state.mode === "missing" ? hintMissing(t) : hintFor(t);
+  box.hidden = false;
+  state.usedHint = true;
+};
+
+/* ================= ТОК ИГРЕ ================= */
+function startGame(mode){
+  state.mode = mode; state.idx = 0; state.stars = 0; state.missed = []; state.doneMap = {};
+  state.queue = [];
+  for(let i=0;i<ROUND;i++){
+    const t = makeTask();
+    if(mode === "word") t.story = makeStory(t);
+    if(mode === "missing") t.hide = Math.random() < 0.5 ? "a" : "b";
+    state.queue.push(t);
+  }
+  $("starCount").textContent = "0";
+  setScreen("game");
+  renderQuestion();
+}
+
+function renderDots(){
+  const d = $("dots"); d.innerHTML = "";
+  for(let i=0;i<ROUND;i++){
+    const s = document.createElement("span");
+    let cls = "dot";
+    if(i < state.idx) cls += state.doneMap[i] ? " done" : " miss";
+    else if(i === state.idx) cls += " now";
+    s.className = cls; d.appendChild(s);
+  }
+}
+
+function renderQuestion(){
+  state.tries = 0; state.typed = ""; state.usedHint = false;
+  const t = state.queue[state.idx];
+  const prompt = $("promptArea"), opts = $("options"), pad = $("padArea");
+  prompt.innerHTML = ""; opts.innerHTML = ""; $("hintText").hidden = true;
+  renderDots(); buddy("🦊", "Полако и сигурно!");
+
+  if(state.mode === "choice"){
+    $("ask").textContent = "Колико је?";
+    prompt.innerHTML = '<div class="task">' + t.a + " " + t.op.replace("-","−") + " " + t.b + ' = ?</div>';
+    opts.hidden = false; pad.hidden = true;
+    buildChoices(t);
+  }
+  else if(state.mode === "type"){
+    $("ask").textContent = "Израчунај и укуцај резултат";
+    prompt.innerHTML = '<div class="task">' + t.a + " " + t.op.replace("-","−") + " " + t.b + ' = ?</div>';
+    opts.hidden = true; pad.hidden = false;
+    buildPad();
+  }
+  else if(state.mode === "missing"){
+    $("ask").textContent = "Који број недостаје?";
+    const blank = '<span class="blank">?</span>';
+    const line = t.hide === "a"
+      ? blank + " " + t.op.replace("-","−") + " " + t.b + " = " + t.ans
+      : t.a + " " + t.op.replace("-","−") + " " + blank + " = " + t.ans;
+    prompt.innerHTML = '<div class="task">' + line + "</div>";
+    opts.hidden = true; pad.hidden = false;
+    buildPad();
+  }
+  else if(state.mode === "word"){
+    $("ask").textContent = "Прочитај задатак и укуцај одговор";
+    prompt.innerHTML = '<div class="story">' + t.story + "</div>";
+    opts.hidden = true; pad.hidden = false;
+    buildPad();
+  }
+  paintAnswer();
+}
+
+function expected(t){
+  if(state.mode === "missing") return t.hide === "a" ? t.a : t.b;
+  return t.ans;
+}
+
+/* --- вишеструки избор --- */
+function buildChoices(t){
+  const set = new Set([t.ans]);
+  const cands = [
+    t.ans+1, t.ans-1, t.ans+10, t.ans-10, t.ans+100, t.ans-100,
+    t.ans+2, t.ans-2, t.ans+9, t.ans-9,
+    t.op === "+" ? t.a - t.b : t.a + t.b
+  ];
+  const wrong = [];
+  shuffle(cands).forEach(v=>{
+    if(wrong.length < 3 && v > 0 && v <= state.range * 2 && !set.has(v)){ set.add(v); wrong.push(v); }
+  });
+  while(wrong.length < 3){
+    const v = rnd(1, state.range);
+    if(!set.has(v)){ set.add(v); wrong.push(v); }
+  }
+  const box = $("options");
+  shuffle([t.ans, ...wrong]).forEach(v=>{
+    const b = document.createElement("button");
+    b.className = "opt"; b.textContent = v;
+    b.onclick = () => {
+      if(b.classList.contains("off") || b.classList.contains("good")) return;
+      if(v === t.ans){
+        b.classList.add("good");
+        document.querySelectorAll(".opt").forEach(x=>{ if(x!==b) x.classList.add("off"); x.onclick=null; });
+        win(t);
+      } else {
+        b.classList.add("bad"); state.tries++;
+        buddy("🤔", "Пробај поново — притисни 💡 ако треба помоћ.");
+        setTimeout(()=>{ b.classList.remove("bad"); b.classList.add("off"); b.onclick=null; }, 500);
+      }
+    };
+    box.appendChild(b);
+  });
+}
+
+/* --- тастатура са бројевима --- */
+function buildPad(){
+  const pad = $("pad"); pad.innerHTML = "";
+  const keys = ["1","2","3","4","5","6","7","8","9","⌫","0","✓"];
+  keys.forEach(k=>{
+    const b = document.createElement("button");
+    b.className = "key" + (k === "⌫" ? " del" : k === "✓" ? " ok" : "");
+    b.textContent = k;
+    b.onclick = () => press(k);
+    pad.appendChild(b);
+  });
+}
+function press(k){
+  const box = $("answerBox");
+  if(box.classList.contains("good")) return;
+  box.classList.remove("bad");
+  if(k === "⌫"){ state.typed = state.typed.slice(0,-1); }
+  else if(k === "✓"){ checkTyped(); return; }
+  else if(state.typed.length < 4){ state.typed += k; }
+  paintAnswer();
+}
+function paintAnswer(){
+  const box = $("answerBox");
+  box.className = "answer-box";
+  box.innerHTML = state.typed === "" ? '<span class="caret">?</span>' : state.typed;
+}
+function checkTyped(){
+  if(state.typed === "") return;
+  const t = state.queue[state.idx], box = $("answerBox");
+  if(+state.typed === expected(t)){
+    box.classList.add("good");
+    win(t);
+  } else {
+    box.classList.add("bad"); state.tries++;
+    buddy("🤔", state.tries >= 2 ? "Притисни 💡 па решавај корак по корак." : "Провери још једном.");
+    setTimeout(()=>{ state.typed = ""; paintAnswer(); }, 800);
+  }
+}
+document.addEventListener("keydown", e=>{
+  if($("screen-game").hidden || $("padArea").hidden) return;
+  if(/^[0-9]$/.test(e.key)) press(e.key);
+  else if(e.key === "Backspace"){ e.preventDefault(); press("⌫"); }
+  else if(e.key === "Enter"){ e.preventDefault(); press("✓"); }
+});
+
+/* --- бодовање --- */
+function taskLabel(t){
+  if(state.mode === "missing"){
+    const hidden = t.hide === "a" ? t.a : t.b;
+    return (t.hide === "a" ? "___ " : t.a + " ") + t.op.replace("-","−") + (t.hide === "b" ? " ___" : " " + t.b) +
+           " = " + t.ans + "  →  " + hidden;
+  }
+  return t.a + " " + t.op.replace("-","−") + " " + t.b + " = " + t.ans;
+}
+function win(t){
+  const first = state.tries === 0 && !state.usedHint;
+  state.doneMap[state.idx] = first;
+  if(first){ state.stars++; confetti(); }
+  else state.missed.push(taskLabel(t));
+  $("starCount").textContent = state.stars;
+  buddy(first ? "🥳" : "🙂", first ? "Браво! Тачно!" : "Тачно је " + expected(t) + ".");
+  setTimeout(()=>{
+    state.idx++;
+    if(state.idx >= ROUND) showResult(); else renderQuestion();
+  }, 1300);
+}
+function showResult(){
+  const s = state.stars;
+  $("resScore").textContent = s;
+  $("resStars").textContent = "⭐".repeat(s) + "☆".repeat(ROUND - s);
+  let msg, emo;
+  if(s === ROUND){ msg = "Савршено! Ниједна грешка!"; emo = "🏆"; }
+  else if(s >= 7){ msg = "Одлично рачунаш! Само настави."; emo = "🎉"; }
+  else if(s >= 4){ msg = "Добро иде — још мало вежбе."; emo = "💪"; }
+  else { msg = "Пробај лакши опсег или укључи помоћ 💡"; emo = "🌱"; }
+  $("resMsg").textContent = msg; $("resEmoji").textContent = emo;
+
+  const rev = $("review"), list = $("reviewList");
+  list.innerHTML = ""; rev.hidden = state.missed.length === 0;
+  state.missed.forEach(txt=>{
+    const li = document.createElement("li"); li.textContent = txt; list.appendChild(li);
+  });
+  setScreen("result");
+}
+
+/* ================= САВЕТИ ================= */
+function buildTips(){
+  $("tipsBody").innerHTML = `
+    <div class="tip">
+      <h3>1. Сабирање по деловима</h3>
+      <p>Други број разложи на стотине, десетице и јединице, па додај један по један део.</p>
+      <div class="calc">
+        347 + 285<br>
+        <span class="step">347 + 200 = 547</span><br>
+        <span class="step">547 + 80 = 627</span><br>
+        <span class="step">627 + 5 = 632</span>
+      </div>
+    </div>
+    <div class="tip">
+      <h3>2. Допуна до пуне стотине</h3>
+      <p>Кад је број близу стотине, прво га допуни до округлог броја — остатак се лакше додаје.</p>
+      <div class="calc">
+        296 + 58<br>
+        <span class="step">296 + 4 = 300</span> &nbsp;(4 узето од 58)<br>
+        <span class="step">300 + 54 = 354</span>
+      </div>
+    </div>
+    <div class="tip">
+      <h3>3. Одузимање по деловима</h3>
+      <p>Исто као сабирање, само уназад: прво стотине, па десетице, па јединице.</p>
+      <div class="calc">
+        625 − 243<br>
+        <span class="step">625 − 200 = 425</span><br>
+        <span class="step">425 − 40 = 385</span><br>
+        <span class="step">385 − 3 = 382</span>
+      </div>
+    </div>
+    <div class="tip">
+      <h3>4. Кад тражиш број који недостаје</h3>
+      <p>Ако недостаје сабирак, одузми. Ако недостаје умањилац, такође одузми.</p>
+      <div class="calc">
+        128 + ___ = 350 &nbsp;→&nbsp; <span class="step">350 − 128 = 222</span><br>
+        470 − ___ = 215 &nbsp;→&nbsp; <span class="step">470 − 215 = 255</span>
+      </div>
+    </div>
+    <div class="tip">
+      <h3>5. Провера резултата</h3>
+      <p>Сабирање се проверава одузимањем, а одузимање сабирањем.</p>
+      <div class="calc">
+        418 + 236 = 654 &nbsp;→&nbsp; провера: <span class="step">654 − 236 = 418</span><br>
+        700 − 265 = 435 &nbsp;→&nbsp; провера: <span class="step">435 + 265 = 700</span>
+      </div>
+    </div>
+  `;
+}
+</script>
+</body>
+</html>
