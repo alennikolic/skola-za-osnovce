@@ -205,14 +205,14 @@ kbd{
     <div class="alatke">
       <div class="grupa">
         <label for="brzina">Брзина</label>
-        <input type="range" id="brzina" min="100" max="1200" step="25" value="60">
-        <span class="brzina-broj" id="brzinaBroj">60</span>
+        <input type="range" id="brzina" min="100" max="1200" step="25" value="100">
+        <span class="brzina-broj" id="brzinaBroj">100</span>
       </div>
       <div class="grupa">
         <label for="grupisanje">Речи одједном</label>
         <select id="grupisanje">
-          <option value="1" selected>1</option>
-          <option value="2">2</option>
+          <option value="1">1</option>
+          <option value="2" selected>2</option>
           <option value="3">3</option>
           <option value="4">4</option>
         </select>
@@ -307,8 +307,8 @@ var tajmer = null;
 var tekuciId = null;
 var oznaceno = [-1,-1];
 
-var brzina = ostava.uzmi("brzocitac.brzina", 60);
-var grupa  = ostava.uzmi("brzocitac.grupa", 1);
+var brzina = ostava.uzmi("brzocitac.brzina2", 100);
+var grupa  = ostava.uzmi("brzocitac.grupa2", 2);
 var rezim  = ostava.uzmi("brzocitac.rezim", "rezim-oba");
 var pauze  = ostava.uzmi("brzocitac.pauze", true);
 var tema   = ostava.uzmi("brzocitac.tema", "tamno");
@@ -325,14 +325,14 @@ function feedURL(pocetak, imeF){
 
 function uCistTekst(html){
   var t = String(html)
-    .replace(/<(script|style|noscript|iframe)[\s\S]*?<\/>/gi, "")
+    .replace(/<(script|style|noscript|iframe)[\s\S]*?<\/>/gi, "")
     .replace(/<br\s*\/?>/gi, "\n")
     .replace(/<\/(p|div|li|h[1-6]|blockquote|tr)>/gi, "\n\n")
     .replace(/<[^>]+>/g, "");
   var d = document.createElement("div");
   d.innerHTML = t;
   return d.textContent
-    .replace(/ /g, " ")
+    .replace(/ /g, " ")
     .replace(/[ 	]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
@@ -585,12 +585,12 @@ $("#traka").oninput = function(){ postavi(parseInt(this.value, 10), true); };
 $("#brzina").oninput = function(){
   brzina = parseInt(this.value, 10);
   $("#brzinaBroj").textContent = brzina;
-  ostava.stavi("brzocitac.brzina", brzina);
+  ostava.stavi("brzocitac.brzina2", brzina);
   stanje();
 };
 $("#grupisanje").onchange = function(){
   grupa = parseInt(this.value, 10);
-  ostava.stavi("brzocitac.grupa", grupa);
+  ostava.stavi("brzocitac.grupa2", grupa);
   postavi(i, true);
 };
 $("#rezim").onchange = function(){
